@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * INOCUL8 brand design system (Tailwind v4)
+ * Primary: teal · Ink: deep teal-black · Accent: coral (conversion)
+ * ------------------------------------------------------------------ */
+@theme {
+  /* Brand teal scale */
+  --color-brand-50: #eafaf8;
+  --color-brand-100: #cef2ee;
+  --color-brand-200: #9fe6df;
+  --color-brand-300: #66d4ca;
+  --color-brand-400: #34beb3;
+  --color-brand-500: #14a89c;
+  --color-brand-600: #0c887e;
+  --color-brand-700: #0d6c65;
+  --color-brand-800: #0f5651;
+  --color-brand-900: #103f3c;
+  --color-brand-950: #042624;
+
+  /* Ink (text + dark footer) */
+  --color-ink-700: #2a3a38;
+  --color-ink-800: #1b2b29;
+  --color-ink-900: #12211f;
+  --color-ink-950: #0b1615;
+
+  /* Coral accent — used sparingly for primary conversion CTAs */
+  --color-accent-400: #ff9472;
+  --color-accent-500: #ff7a59;
+  --color-accent-600: #f25b36;
+
+  /* Warm amber for ratings/badges */
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #f59e0b;
+
+  --color-background: #ffffff;
+  --color-foreground: #16302d;
+  --color-muted: #5b6b69;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
+  --shadow-soft: 0 1px 2px rgba(16, 63, 60, 0.04), 0 8px 24px -8px rgba(16, 63, 60, 0.12);
+  --shadow-lift: 0 12px 40px -12px rgba(12, 136, 126, 0.35);
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-ink-900);
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Subtle mint mesh background for hero/sections */
+  .bg-mesh {
+    background-image:
+      radial-gradient(60% 60% at 15% 0%, rgba(52, 190, 179, 0.14) 0%, transparent 60%),
+      radial-gradient(50% 50% at 100% 20%, rgba(102, 212, 202, 0.16) 0%, transparent 55%);
+  }
+  .text-gradient {
+    background: linear-gradient(120deg, var(--color-brand-600), var(--color-brand-400));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
