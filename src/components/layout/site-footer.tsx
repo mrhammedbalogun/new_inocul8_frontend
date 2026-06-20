@@ -27,7 +27,7 @@ export function SiteFooter() {
 
       <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
-          <Logo variant="light" showTagline />
+          <Logo className="h-11" />
           <p className="mt-4 max-w-xs text-sm leading-relaxed">
             Inocul8 is a health-technology company offering preventive healthcare products and
             services to families and organizations across all sectors.

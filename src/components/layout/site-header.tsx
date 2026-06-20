@@ -68,7 +68,7 @@ export function SiteHeader() {
       >
         <Container className="flex h-16 items-center justify-between gap-4 lg:h-[72px]">
           <Link href="/" aria-label="Inocul8 home" className="shrink-0">
-            <Logo />
+            <Logo priority />
           </Link>
 
           {/* Desktop nav */}
