@@ -10,13 +10,13 @@ export const serviceCards = [
   {
     title: "myHealth: Chronic Infection Care",
     body: "Living with hepatitis B, genital warts or herpes shouldn't mean facing it alone. A dedicated partner: regular consultations, affordable medicines & labs, and lifestyle coaching.",
-    href: "/what-we-do/myhealth",
+    href: "/what-we-do/myhealth-services",
     icon: "heart-pulse",
   },
   {
     title: "Your Passport to Healthy Travel",
     body: "Travel with confidence. We review your itinerary and provide the travel immunizations, yellow fever cards and health advice you need — wherever you're headed.",
-    href: "/what-we-do/travel-health",
+    href: "/what-we-do/travel-health-services",
     icon: "plane",
   },
   {

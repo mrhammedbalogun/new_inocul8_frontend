@@ -100,4 +100,69 @@
     background-clip: text;
     color: transparent;
   }
+
+  /* Typography for migrated service-page content (see ServiceProse). */
+  .service-prose {
+    color: var(--color-ink-800);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .service-prose > * + * {
+    margin-top: 1.1em;
+  }
+  .service-prose h2 {
+    margin-top: 2.25rem;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-ink-900);
+  }
+  .service-prose h3 {
+    margin-top: 2rem;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-brand-700);
+  }
+  .service-prose ul {
+    margin-top: 0.75rem;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .service-prose li {
+    position: relative;
+    padding-left: 1.75rem;
+  }
+  .service-prose li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0.05em;
+    display: grid;
+    place-items: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 9999px;
+    background: var(--color-brand-50);
+    color: var(--color-brand-600);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .service-prose strong {
+    color: var(--color-ink-900);
+    font-weight: 600;
+  }
+  .service-prose a {
+    color: var(--color-brand-700);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .service-prose a:hover {
+    color: var(--color-brand-800);
+  }
 }

@@ -7,6 +7,10 @@ import {
   Wallet,
   Clock,
   ShieldCheck,
+  Baby,
+  Stethoscope,
+  Briefcase,
+  Globe,
   type LucideProps,
 } from "lucide-react";
 
@@ -19,6 +23,10 @@ const map = {
   wallet: Wallet,
   clock: Clock,
   "shield-check": ShieldCheck,
+  baby: Baby,
+  stethoscope: Stethoscope,
+  briefcase: Briefcase,
+  globe: Globe,
 } as const;
 
 export type IconName = keyof typeof map;

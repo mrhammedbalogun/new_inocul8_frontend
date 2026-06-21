@@ -54,3 +54,35 @@ export const faqSchema = {
     acceptedAnswer: { "@type": "Answer", text: f.a },
   })),
 };
+
+/** BreadcrumbList from an ordered list of {name, path} crumbs (paths are site-relative). */
+export function breadcrumbSchema(crumbs: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      item: `${site.url}${c.path === "/" ? "" : c.path}`,
+    })),
+  };
+}
+
+/** Medical service/procedure offered by the clinic — for a service detail page. */
+export function medicalServiceSchema(opts: {
+  name: string;
+  description: string;
+  path: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "MedicalProcedure",
+    name: opts.name,
+    description: opts.description,
+    url: `${site.url}${opts.path}`,
+    procedureType: "https://schema.org/NoteworthyType",
+    provider: { "@id": `${site.url}/#organization` },
+    areaServed: { "@type": "City", name: "Lagos" },
+  };
+}
