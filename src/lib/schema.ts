@@ -69,6 +69,28 @@ export function breadcrumbSchema(crumbs: { name: string; path: string }[]) {
   };
 }
 
+/** Article schema for a blog post. */
+export function articleSchema(opts: {
+  title: string;
+  description: string;
+  path: string;
+  datePublished: string;
+  dateModified: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: opts.title,
+    description: opts.description,
+    datePublished: new Date(opts.datePublished.replace(" ", "T")).toISOString(),
+    dateModified: new Date((opts.dateModified || opts.datePublished).replace(" ", "T")).toISOString(),
+    author: { "@id": `${site.url}/#organization` },
+    publisher: { "@id": `${site.url}/#organization` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${site.url}${opts.path}` },
+    url: `${site.url}${opts.path}`,
+  };
+}
+
 /** Medical service/procedure offered by the clinic — for a service detail page. */
 export function medicalServiceSchema(opts: {
   name: string;
