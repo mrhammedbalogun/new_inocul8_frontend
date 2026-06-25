@@ -21,9 +21,8 @@ export const metadata: Metadata = {
   openGraph: { title: "Inocul8 Blog", description, url: "/blogpost", type: "website" },
 };
 
-export default function BlogIndexPage() {
-  const posts = getAllPosts();
-  const categories = getCategories();
+export default async function BlogIndexPage() {
+  const [posts, categories] = await Promise.all([getAllPosts(), getCategories()]);
   const [featured, ...rest] = posts;
   const crumbs = [
     { name: "Home", path: "/" },

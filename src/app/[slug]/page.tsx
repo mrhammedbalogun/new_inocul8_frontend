@@ -17,15 +17,15 @@ import { site } from "@/lib/site";
 // Posts keep their original root slugs; only the 70 known slugs resolve here.
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getAllPostSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getAllPostSlugs()).map((slug) => ({ slug }));
 }
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) return {};
   const description = post.metaDescription || post.excerpt;
   return {
@@ -46,10 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) notFound();
 
-  const related = getRelatedPosts(post, 3);
+  const related = await getRelatedPosts(post, 3);
   const category = post.categories[0];
   const crumbs = [
     { name: "Home", path: "/" },

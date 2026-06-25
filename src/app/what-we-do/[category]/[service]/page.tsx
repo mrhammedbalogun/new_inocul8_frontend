@@ -21,7 +21,7 @@ type Props = { params: Promise<{ category: string; service: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, service } = await params;
-  const page = getService(category, service);
+  const page = await getService(category, service);
   if (!page) return {};
   const description = page.metaDescription || page.excerpt;
   return {
@@ -35,8 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ServicePage({ params }: Props) {
   const { category, service } = await params;
-  const cat = getCategory(category);
-  const page = getService(category, service);
+  const [cat, page] = await Promise.all([getCategory(category), getService(category, service)]);
   if (!cat || !page) notFound();
 
   const related = cat.services.filter((s) => s.slug !== page.slug).slice(0, 4);

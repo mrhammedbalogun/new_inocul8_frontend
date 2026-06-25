@@ -12,15 +12,15 @@ import { getCategories, getCategory, getPostsByCategory } from "@/lib/blog";
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getCategories().map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  return (await getCategories()).map((c) => ({ slug: c.slug }));
 }
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const cat = getCategory(slug);
+  const cat = await getCategory(slug);
   if (!cat) return {};
   const description = `${cat.name} — vaccine and preventive-health articles from Inocul8, Lagos.`;
   const path = `/blog/category/${cat.slug}`;
@@ -34,10 +34,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const cat = getCategory(slug);
+  const cat = await getCategory(slug);
   if (!cat) notFound();
 
-  const posts = getPostsByCategory(slug);
+  const posts = await getPostsByCategory(slug);
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "Blog", path: "/blogpost" },

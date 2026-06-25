@@ -10,11 +10,12 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbSchema } from "@/lib/schema";
 import { getPage, pageMetadata } from "@/lib/pages";
 
-const page = getPage("about-us");
+export function generateMetadata() {
+  return pageMetadata("about-us", "website");
+}
 
-export const metadata = pageMetadata("about-us", "website");
-
-export default function AboutPage() {
+export default async function AboutPage() {
+  const page = await getPage("about-us");
   if (!page) notFound();
   const crumbs = [
     { name: "Home", path: "/" },

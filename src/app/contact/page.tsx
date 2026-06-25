@@ -9,17 +9,19 @@ import { breadcrumbSchema } from "@/lib/schema";
 import { site, phoneHref, whatsappHref } from "@/lib/site";
 import { getPage } from "@/lib/pages";
 
-const page = getPage("contact");
 const fullAddress = `${site.address.street}, ${site.address.locality}, ${site.address.region}, ${site.address.country}`;
 
-export const metadata: Metadata = {
-  title: page?.seoTitle || "Contact Us",
-  description:
-    page?.metaDescription ||
-    `Get in touch with Inocul8 — visit us at ${site.address.locality}, ${site.address.region}, call ${site.phones[0]}, or send an enquiry. ${site.hours}.`,
-  alternates: { canonical: "/contact" },
-  openGraph: { title: "Contact Inocul8", description: page?.metaDescription, url: "/contact", type: "website" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPage("contact");
+  return {
+    title: page?.seoTitle || "Contact Us",
+    description:
+      page?.metaDescription ||
+      `Get in touch with Inocul8 — visit us at ${site.address.locality}, ${site.address.region}, call ${site.phones[0]}, or send an enquiry. ${site.hours}.`,
+    alternates: { canonical: "/contact" },
+    openGraph: { title: "Contact Inocul8", description: page?.metaDescription, url: "/contact", type: "website" },
+  };
+}
 
 const contactItems = [
   { icon: MapPin, label: "Visit us", value: fullAddress, href: `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}` },

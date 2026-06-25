@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 import { StandalonePage } from "@/components/service/standalone-page";
 import { getPage, pageMetadata } from "@/lib/pages";
 
-const page = getPage("genital-warts");
+export function generateMetadata() {
+  return pageMetadata("genital-warts");
+}
 
-export const metadata = pageMetadata("genital-warts");
-
-export default function GenitalWartsPage() {
+export default async function GenitalWartsPage() {
+  const page = await getPage("genital-warts");
   if (!page) notFound();
   return (
     <StandalonePage

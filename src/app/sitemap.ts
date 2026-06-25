@@ -3,15 +3,19 @@ import { site, megaMenu, mainNav } from "@/lib/site";
 import { allServicePaths } from "@/lib/services";
 import { getAllPosts, getCategories } from "@/lib/blog";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const staticRoutes = mainNav.map((l) => l.href);
   const menuRoutes = megaMenu.flatMap((c) => [c.href, ...c.links.map((l) => l.href)]);
   // The content layer is the source of truth for the /what-we-do tree — include
   // every service URL even if the curated mega-menu omits some.
-  const serviceRoutes = allServicePaths();
-  const blogRoutes = getCategories().map((c) => `/blog/category/${c.slug}`);
-  const postEntries = getAllPosts().map((p) => ({ path: `/${p.slug}`, lastModified: p.modified || p.date }));
+  const [serviceRoutes, posts, blogCategories] = await Promise.all([
+    allServicePaths(),
+    getAllPosts(),
+    getCategories(),
+  ]);
+  const blogRoutes = blogCategories.map((c) => `/blog/category/${c.slug}`);
+  const postEntries = posts.map((p) => ({ path: `/${p.slug}`, lastModified: p.modified || p.date }));
 
   const seen = new Set<string>();
   const pageEntries = [...staticRoutes, ...menuRoutes, ...serviceRoutes, ...blogRoutes]

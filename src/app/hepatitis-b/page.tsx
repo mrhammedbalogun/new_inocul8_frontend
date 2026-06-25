@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 import { StandalonePage } from "@/components/service/standalone-page";
 import { getPage, pageMetadata } from "@/lib/pages";
 
-const page = getPage("hepatitis-b");
+export function generateMetadata() {
+  return pageMetadata("hepatitis-b");
+}
 
-export const metadata = pageMetadata("hepatitis-b");
-
-export default function HepatitisBPage() {
+export default async function HepatitisBPage() {
+  const page = await getPage("hepatitis-b");
   if (!page) notFound();
   return (
     <StandalonePage

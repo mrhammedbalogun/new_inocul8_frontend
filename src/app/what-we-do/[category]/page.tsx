@@ -22,7 +22,7 @@ type Props = { params: Promise<{ category: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
-  const cat = getCategory(category);
+  const cat = await getCategory(category);
   if (!cat) return {};
   const canonical = cat.path;
   const description = cat.page.metaDescription || cat.blurb;
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { category } = await params;
-  const cat = getCategory(category);
+  const cat = await getCategory(category);
   if (!cat) notFound();
 
   const crumbs = [

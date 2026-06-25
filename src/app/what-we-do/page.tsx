@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function WhatWeDoPage() {
-  const categories = getCategories();
+export default async function WhatWeDoPage() {
+  const categories = await getCategories();
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "What We Do", path: "/what-we-do" },

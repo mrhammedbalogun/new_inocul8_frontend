@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 import { StandalonePage } from "@/components/service/standalone-page";
 import { getPage, pageMetadata } from "@/lib/pages";
 
-const page = getPage("yellow-fever");
+export function generateMetadata() {
+  return pageMetadata("yellow-fever");
+}
 
-export const metadata = pageMetadata("yellow-fever");
-
-export default function YellowFeverPage() {
+export default async function YellowFeverPage() {
+  const page = await getPage("yellow-fever");
   if (!page) notFound();
   return (
     <StandalonePage
