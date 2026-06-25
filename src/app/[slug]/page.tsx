@@ -103,7 +103,22 @@ export default async function PostPage({ params }: Props) {
         <Container className="max-w-3xl">
           <ServiceProse html={post.html} />
 
-          <div className="mt-10 border-t border-ink-900/8 pt-6">
+          {post.tags.length > 0 && (
+            <div className="mt-10 flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-ink-800">Tags</span>
+              {post.tags.map((t) => (
+                <Link
+                  key={t.slug}
+                  href={`/search?q=${encodeURIComponent(t.name)}`}
+                  className="rounded-full border border-ink-900/10 px-3 py-1 text-xs font-medium text-ink-700 transition-colors hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
+                >
+                  {t.name}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 border-t border-ink-900/8 pt-6">
             <ShareButtons slug={post.slug} title={post.title} />
           </div>
 

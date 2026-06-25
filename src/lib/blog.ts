@@ -19,6 +19,7 @@ export type BlogPost = {
   metaDescription: string;
   focusKeyword: string;
   categories: Category[];
+  tags: Category[];
   readingMinutes: number;
   wordCount: number;
   html: string;
