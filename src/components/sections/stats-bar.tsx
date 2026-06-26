@@ -1,7 +1,7 @@
 import { Container } from "@/components/ui/container";
-import { stats } from "@/lib/content";
+import { HOME_FALLBACK, type Stat } from "@/lib/home";
 
-export function StatsBar() {
+export function StatsBar({ stats = HOME_FALLBACK.stats }: { stats?: Stat[] }) {
   return (
     <section className="border-y border-ink-900/5 bg-white">
       <Container>

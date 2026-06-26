@@ -1,17 +1,23 @@
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
-import { steps } from "@/lib/content";
 import { site } from "@/lib/site";
+import { HOME_CONTENT_FALLBACK, HOME_FALLBACK, type HomeContent, type ProcessStep } from "@/lib/home";
 
-export function HowItWorks() {
+export function HowItWorks({
+  content = HOME_CONTENT_FALLBACK,
+  steps = HOME_FALLBACK.steps,
+}: {
+  content?: HomeContent;
+  steps?: ProcessStep[];
+}) {
   return (
     <section className="bg-brand-50/60 py-20 sm:py-24">
       <Container>
         <SectionHeading
-          eyebrow="How It Works"
-          title="Protected in three simple steps"
-          description="No queues, no guesswork. Book in minutes and get care wherever you are."
+          eyebrow={content.steps_eyebrow}
+          title={content.steps_title}
+          description={content.steps_description}
         />
 
         <div className="mt-14 grid gap-8 md:grid-cols-3">
@@ -32,7 +38,7 @@ export function HowItWorks() {
 
         <div className="mt-12 text-center">
           <Button href={site.bookingUrl} variant="accent" size="lg">
-            Book Now
+            {content.steps_cta_label}
           </Button>
         </div>
       </Container>

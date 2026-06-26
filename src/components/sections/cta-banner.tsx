@@ -1,8 +1,9 @@
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { site, whatsappHref } from "@/lib/site";
+import { HOME_CONTENT_FALLBACK, type HomeContent } from "@/lib/home";
 
-export function CtaBanner() {
+export function CtaBanner({ content = HOME_CONTENT_FALLBACK }: { content?: HomeContent }) {
   return (
     <section className="py-16">
       <Container>
@@ -10,12 +11,9 @@ export function CtaBanner() {
           <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_20%_20%,white,transparent_40%),radial-gradient(circle_at_80%_70%,white,transparent_35%)]" />
           <div className="relative mx-auto max-w-2xl">
             <h2 className="font-display text-3xl font-semibold text-white sm:text-4xl">
-              Ready to protect what matters most?
+              {content.cta_title}
             </h2>
-            <p className="mt-4 text-base text-white/80 sm:text-lg">
-              Book a vaccination or a free consultation today — at your home, office, or an access
-              point near you.
-            </p>
+            <p className="mt-4 text-base text-white/80 sm:text-lg">{content.cta_description}</p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Button href={site.bookingUrl} variant="white" size="lg">
                 Book an Appointment

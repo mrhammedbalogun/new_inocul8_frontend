@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { JsonLd } from "@/components/seo/json-ld";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
+import { getNav } from "@/lib/nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,7 +65,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const nav = await getNav();
   return (
     <html lang="en" className={`${geistSans.variable} ${fraunces.variable}`}>
       <body className="flex min-h-full flex-col font-sans antialiased">
@@ -75,11 +77,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Skip to content
         </a>
-        <SiteHeader />
+        <SiteHeader mainNav={nav.main} />
         <main id="main" className="flex-1">
           {children}
         </main>
-        <SiteFooter />
+        <SiteFooter
+          services={nav.footer_services}
+          company={nav.footer_company}
+          legal={nav.footer_legal}
+        />
       </body>
     </html>
   );

@@ -2,18 +2,24 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { blogTeasers } from "@/lib/content";
+import { HOME_CONTENT_FALLBACK, HOME_FALLBACK, type BlogTeaser as BlogTeaserItem, type HomeContent } from "@/lib/home";
 
-export function BlogTeaser() {
+export function BlogTeaser({
+  content = HOME_CONTENT_FALLBACK,
+  teasers = HOME_FALLBACK.blog_teasers,
+}: {
+  content?: HomeContent;
+  teasers?: BlogTeaserItem[];
+}) {
   return (
     <section className="bg-brand-50/60 py-20 sm:py-24">
       <Container>
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <SectionHeading
             align="left"
-            eyebrow="From the blog"
-            title="Talk vaccines with Inocul8"
-            description="Practical guides on travel health, yellow fever cards and preventive care in Nigeria."
+            eyebrow={content.blog_eyebrow}
+            title={content.blog_title}
+            description={content.blog_description}
           />
           <Link
             href="/blogpost"
@@ -24,7 +30,7 @@ export function BlogTeaser() {
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {blogTeasers.map((post) => (
+          {teasers.map((post) => (
             <Link
               key={post.href}
               href={post.href}

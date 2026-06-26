@@ -3,20 +3,26 @@ import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Icon } from "@/components/ui/icon";
-import { serviceCards } from "@/lib/content";
+import { HOME_CONTENT_FALLBACK, HOME_FALLBACK, type HomeContent, type ServiceCard } from "@/lib/home";
 
-export function Services() {
+export function Services({
+  content = HOME_CONTENT_FALLBACK,
+  cards = HOME_FALLBACK.service_cards,
+}: {
+  content?: HomeContent;
+  cards?: ServiceCard[];
+}) {
   return (
     <section id="services" className="py-20 sm:py-24">
       <Container>
         <SectionHeading
-          eyebrow="What We Do"
-          title="Preventive healthcare, end to end"
-          description="From a baby's first shots to a healthier workforce, Inocul8 covers every stage of preventive care."
+          eyebrow={content.services_eyebrow}
+          title={content.services_title}
+          description={content.services_description}
         />
 
         <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {serviceCards.map((card) => (
+          {cards.map((card) => (
             <Link
               key={card.title}
               href={card.href}

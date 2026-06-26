@@ -45,15 +45,20 @@ export const websiteSchema = {
   },
 };
 
-export const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
-};
+/** FAQPage schema from an ordered list of {q, a} (defaults to the static FAQs). */
+export function faqSchemaFrom(items: { q: string; a: string }[] = [...faqs]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+}
+
+export const faqSchema = faqSchemaFrom();
 
 /** BreadcrumbList from an ordered list of {name, path} crumbs (paths are site-relative). */
 export function breadcrumbSchema(crumbs: { name: string; path: string }[]) {

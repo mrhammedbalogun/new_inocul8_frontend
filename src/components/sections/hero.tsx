@@ -2,6 +2,7 @@ import { Star, ShieldCheck, Clock, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { site, whatsappHref } from "@/lib/site";
+import { fillRating, HOME_CONTENT_FALLBACK, type HomeContent } from "@/lib/home";
 
 const trustPoints = [
   { Icon: Home, label: "At your doorstep" },
@@ -9,7 +10,13 @@ const trustPoints = [
   { Icon: ShieldCheck, label: "Certified vaccines" },
 ];
 
-export function Hero() {
+export function Hero({ content = HOME_CONTENT_FALLBACK }: { content?: HomeContent }) {
+  // Split the title so the highlight tail renders in the brand gradient.
+  const highlight = content.hero_title_highlight;
+  const idx = highlight ? content.hero_title.lastIndexOf(highlight) : -1;
+  const head = idx >= 0 ? content.hero_title.slice(0, idx) : content.hero_title;
+  const tail = idx >= 0 ? content.hero_title.slice(idx) : "";
+
   return (
     <section className="relative overflow-hidden bg-mesh">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-12 lg:py-24">
@@ -21,25 +28,22 @@ export function Hero() {
                 <Star key={i} className="size-3.5 fill-gold-400 text-gold-400" />
               ))}
             </span>
-            Rated {site.rating.value} by {site.rating.count}+ patients
+            {fillRating(content.hero_badge, site.rating.value, site.rating.count)}
           </div>
 
           <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] text-ink-900 sm:text-5xl lg:text-6xl">
-            Vaccination &amp; preventive care,{" "}
-            <span className="text-gradient">at your doorstep.</span>
+            {head}
+            {tail && <span className="text-gradient">{tail}</span>}
           </h1>
 
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
-            Convenient, affordable and timely immunization for your family and your team — childhood
-            vaccines, travel health &amp; yellow fever cards, and adult vaccines across Lagos.
-          </p>
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">{content.hero_subtitle}</p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button href={site.bookingUrl} variant="accent" size="lg">
-              Book an Appointment
+              {content.hero_cta_primary}
             </Button>
             <Button href={whatsappHref} variant="outline" size="lg">
-              Chat on WhatsApp
+              {content.hero_cta_secondary}
             </Button>
           </div>
 

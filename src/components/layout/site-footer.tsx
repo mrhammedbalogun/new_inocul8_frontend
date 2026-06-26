@@ -4,9 +4,22 @@ import { Logo } from "@/components/brand/logo";
 import { InstagramIcon, FacebookIcon, XIcon, LinkedinIcon } from "@/components/brand/social-icons";
 import { Container } from "@/components/ui/container";
 import { NewsletterForm } from "@/components/newsletter-form";
-import { site, footerServices, mainNav, phoneHref } from "@/lib/site";
+import { site, footerServices, mainNav, phoneHref, type NavLink } from "@/lib/site";
 
-export function SiteFooter() {
+const DEFAULT_LEGAL: NavLink[] = [
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms", href: "/terms" },
+];
+
+export function SiteFooter({
+  services = footerServices,
+  company = mainNav,
+  legal = DEFAULT_LEGAL,
+}: {
+  services?: NavLink[];
+  company?: NavLink[];
+  legal?: NavLink[];
+}) {
   const year = new Date().getFullYear();
   return (
     <footer className="bg-ink-900 text-white/70">
@@ -56,7 +69,7 @@ export function SiteFooter() {
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-wider text-white">Our Services</h4>
           <ul className="mt-4 space-y-2.5 text-sm">
-            {footerServices.map((s) => (
+            {services.map((s) => (
               <li key={s.href}>
                 <Link href={s.href} className="transition-colors hover:text-brand-300">
                   {s.label}
@@ -69,7 +82,7 @@ export function SiteFooter() {
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-wider text-white">Company</h4>
           <ul className="mt-4 space-y-2.5 text-sm">
-            {mainNav.map((l) => (
+            {company.map((l) => (
               <li key={l.href}>
                 <Link href={l.href} className="transition-colors hover:text-brand-300">
                   {l.label}
@@ -112,8 +125,11 @@ export function SiteFooter() {
         <Container className="flex flex-col items-center justify-between gap-2 py-5 text-xs sm:flex-row">
           <p>© {year} Inocul8. All rights reserved.</p>
           <div className="flex gap-5">
-            <Link href="/privacy-policy" className="hover:text-brand-300">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-brand-300">Terms</Link>
+            {legal.map((l) => (
+              <Link key={l.href} href={l.href} className="hover:text-brand-300">
+                {l.label}
+              </Link>
+            ))}
           </div>
         </Container>
       </div>

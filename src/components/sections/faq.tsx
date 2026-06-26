@@ -4,18 +4,24 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { faqs } from "@/lib/content";
 import { cn } from "@/lib/utils";
+import { HOME_CONTENT_FALLBACK, HOME_FALLBACK, type HomeContent, type HomeFaq } from "@/lib/home";
 
-export function Faq() {
+export function Faq({
+  content = HOME_CONTENT_FALLBACK,
+  faqs = HOME_FALLBACK.faqs,
+}: {
+  content?: HomeContent;
+  faqs?: HomeFaq[];
+}) {
   const [open, setOpen] = useState<number | null>(0);
   return (
     <section className="py-20 sm:py-24">
       <Container className="max-w-3xl">
         <SectionHeading
-          eyebrow="FAQ"
-          title="Questions, answered"
-          description="Everything you need to know before you book. Still unsure? Reach out — we're happy to help."
+          eyebrow={content.faq_eyebrow}
+          title={content.faq_title}
+          description={content.faq_description}
         />
 
         <div className="mt-12 divide-y divide-ink-900/10 rounded-2xl border border-ink-900/10 bg-white">

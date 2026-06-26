@@ -31,7 +31,9 @@ const map = {
 
 export type IconName = keyof typeof map;
 
-export function Icon({ name, ...props }: { name: IconName } & LucideProps) {
-  const C = map[name];
+// `name` is widened to string so CMS-entered icon values can't break the build;
+// unknown names fall back to a neutral icon rather than crashing.
+export function Icon({ name, ...props }: { name: IconName | (string & {}) } & LucideProps) {
+  const C = map[name as IconName] ?? ShieldCheck;
   return <C {...props} />;
 }

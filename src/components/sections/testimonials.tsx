@@ -1,17 +1,23 @@
 import { Star, Quote } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { testimonials } from "@/lib/content";
 import { site } from "@/lib/site";
+import { fillRating, HOME_CONTENT_FALLBACK, HOME_FALLBACK, type HomeContent, type Testimonial } from "@/lib/home";
 
-export function Testimonials() {
+export function Testimonials({
+  content = HOME_CONTENT_FALLBACK,
+  testimonials = HOME_FALLBACK.testimonials,
+}: {
+  content?: HomeContent;
+  testimonials?: Testimonial[];
+}) {
   return (
     <section className="bg-ink-900 py-20 sm:py-24">
       <Container>
         <SectionHeading
-          eyebrow="Loved by patients"
-          title={<span className="text-white">Trusted across Lagos and beyond</span>}
-          description={`Rated ${site.rating.value} from ${site.rating.count}+ reviews — here's what people say about care with Inocul8.`}
+          eyebrow={content.testimonials_eyebrow}
+          title={<span className="text-white">{content.testimonials_title}</span>}
+          description={fillRating(content.testimonials_description, site.rating.value, site.rating.count)}
           className="[&_p]:text-white/60"
         />
 
@@ -26,7 +32,7 @@ export function Testimonials() {
                 “{t.quote}”
               </blockquote>
               <div className="mt-5 flex">
-                {Array.from({ length: 5 }).map((_, i) => (
+                {Array.from({ length: t.rating || 5 }).map((_, i) => (
                   <Star key={i} className="size-4 fill-gold-400 text-gold-400" />
                 ))}
               </div>

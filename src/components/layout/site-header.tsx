@@ -7,10 +7,10 @@ import { ChevronDown, Menu, X, Phone, Star, Clock, ChevronRight } from "lucide-r
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { mainNav, megaMenu, site, phoneHref } from "@/lib/site";
+import { mainNav as staticMainNav, megaMenu, site, phoneHref, type NavLink } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export function SiteHeader() {
+export function SiteHeader({ mainNav = staticMainNav }: { mainNav?: NavLink[] }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
@@ -153,7 +153,12 @@ export function SiteHeader() {
       </div>
 
       {/* Mobile drawer */}
-      <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)} pathname={pathname} />
+      <MobileDrawer
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        pathname={pathname}
+        mainNav={mainNav}
+      />
     </header>
   );
 }
@@ -162,10 +167,12 @@ function MobileDrawer({
   open,
   onClose,
   pathname,
+  mainNav,
 }: {
   open: boolean;
   onClose: () => void;
   pathname: string;
+  mainNav: NavLink[];
 }) {
   const [openCol, setOpenCol] = useState<string | null>(null);
   return (
