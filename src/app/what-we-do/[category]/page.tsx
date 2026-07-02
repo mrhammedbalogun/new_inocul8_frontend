@@ -11,8 +11,18 @@ import { CtaBanner } from "@/components/sections/cta-banner";
 import { MobileBookBar } from "@/components/mobile-book-bar";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getCategories, getCategory, getCategoryParams } from "@/lib/services";
+import { getPage } from "@/lib/pages";
 import { breadcrumbSchema, medicalServiceSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
+
+// Standalone top-level pages (preserved WP URLs, outside /what-we-do/) that
+// belong on a category's card grid for parity with the legacy site, which
+// listed them inline even though they don't live under the category path.
+const EXTRA_CATEGORY_PAGES: Record<string, string[]> = {
+  "travel-health-services": ["yellow-fever", "yellow-fever-travel-international-premium"],
+  "sexual-reproductive-health-services": ["hepatitis-b"],
+  "myhealth-services": ["genital-warts"],
+};
 
 export function generateStaticParams() {
   return getCategoryParams();
@@ -39,12 +49,21 @@ export default async function CategoryPage({ params }: Props) {
   const cat = await getCategory(category);
   if (!cat) notFound();
 
+  const extraSlugs = EXTRA_CATEGORY_PAGES[category] ?? [];
+  const extraPages = extraSlugs.length ? await Promise.all(extraSlugs.map((slug) => getPage(slug))) : [];
+  const cards = [
+    ...cat.services.map((s) => ({ key: s.slug, path: s.path, title: s.title, excerpt: s.excerpt })),
+    ...extraPages
+      .filter((p): p is NonNullable<typeof p> => Boolean(p))
+      .map((p) => ({ key: p.slug, path: p.path, title: p.title, excerpt: p.excerpt })),
+  ].sort((a, b) => a.title.localeCompare(b.title, "en"));
+
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "What We Do", path: "/what-we-do" },
     { name: cat.label, path: cat.path },
   ];
-  const hasChildren = cat.services.length > 0;
+  const hasChildren = cards.length > 0;
 
   return (
     <>
@@ -81,9 +100,9 @@ export default async function CategoryPage({ params }: Props) {
         <section className="py-16 sm:py-20">
           <Container>
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {cat.services.map((s) => (
+              {cards.map((s) => (
                 <Link
-                  key={s.slug}
+                  key={s.key}
                   href={s.path}
                   className="group flex flex-col rounded-2xl border border-ink-900/8 bg-white p-6 shadow-soft transition-all hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift"
                 >
