@@ -11,20 +11,21 @@ import { MobileBookBar } from "@/components/mobile-book-bar";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqSchemaFrom } from "@/lib/schema";
 import { getHome } from "@/lib/home";
+import { getSiteRating } from "@/lib/settings";
 
 export default async function HomePage() {
-  const home = await getHome();
+  const [home, rating] = await Promise.all([getHome(), getSiteRating()]);
   const { content } = home;
 
   return (
     <>
       <JsonLd data={faqSchemaFrom(home.faqs)} />
-      <Hero content={content} />
+      <Hero content={content} rating={rating} />
       <StatsBar stats={home.stats} />
       <Services content={content} cards={home.service_cards} />
       <HowItWorks content={content} steps={home.steps} />
       <WhyUs content={content} items={home.value_props} />
-      <Testimonials content={content} testimonials={home.testimonials} />
+      <Testimonials content={content} testimonials={home.testimonials} rating={rating} />
       <BlogTeaser content={content} teasers={home.blog_teasers} />
       <Faq content={content} faqs={home.faqs} />
       <CtaBanner content={content} />

@@ -11,7 +11,13 @@ const trustPoints = [
   { icon: "clock", label: "Timeliness" },
 ] as const;
 
-export function Hero({ content = HOME_CONTENT_FALLBACK }: { content?: HomeContent }) {
+export function Hero({
+  content = HOME_CONTENT_FALLBACK,
+  rating = site.rating,
+}: {
+  content?: HomeContent;
+  rating?: { value: number; count: number };
+}) {
   // Split the title so the highlight tail renders in the brand gradient.
   const highlight = content.hero_title_highlight;
   const idx = highlight ? content.hero_title.lastIndexOf(highlight) : -1;
@@ -29,7 +35,7 @@ export function Hero({ content = HOME_CONTENT_FALLBACK }: { content?: HomeConten
                 <Star key={i} className="size-3.5 fill-gold-400 text-gold-400" />
               ))}
             </span>
-            {fillRating(content.hero_badge, site.rating.value, site.rating.count)}
+            {fillRating(content.hero_badge, rating.value, rating.count)}
           </div>
 
           <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] text-ink-900 sm:text-5xl lg:text-6xl">

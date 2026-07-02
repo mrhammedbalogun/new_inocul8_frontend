@@ -3,7 +3,7 @@ import { faqs } from "@/lib/content";
 
 const phoneIntl = `+234${site.phones[0].replace(/^0/, "")}`;
 
-export const organizationSchema = {
+export const organizationSchema = (rating: { value: number; count: number } = site.rating) => ({
   "@context": "https://schema.org",
   "@type": ["Organization", "MedicalBusiness", "MedicalClinic"],
   "@id": `${site.url}/#organization`,
@@ -24,12 +24,12 @@ export const organizationSchema = {
   openingHours: "Mo-Sa 08:30-18:00",
   aggregateRating: {
     "@type": "AggregateRating",
-    ratingValue: String(site.rating.value),
-    reviewCount: String(site.rating.count),
+    ratingValue: String(rating.value),
+    reviewCount: String(rating.count),
     bestRating: "5",
   },
   sameAs: Object.values(site.socials),
-};
+});
 
 export const websiteSchema = {
   "@context": "https://schema.org",

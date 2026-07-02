@@ -50,9 +50,11 @@ function TestimonialCard({ t, hidden = false }: { t: Testimonial; hidden?: boole
 export function Testimonials({
   content = HOME_CONTENT_FALLBACK,
   testimonials = HOME_FALLBACK.testimonials,
+  rating = site.rating,
 }: {
   content?: HomeContent;
   testimonials?: Testimonial[];
+  rating?: { value: number; count: number };
 }) {
   // With a handful of reviews a static grid looks intentional; once the Google
   // sync grows the collection, switch to an endless marquee.
@@ -64,7 +66,7 @@ export function Testimonials({
         <SectionHeading
           eyebrow={content.testimonials_eyebrow}
           title={<span className="text-white">{content.testimonials_title}</span>}
-          description={fillRating(content.testimonials_description, site.rating.value, site.rating.count)}
+          description={fillRating(content.testimonials_description, rating.value, rating.count)}
           className="[&_p]:text-white/60 [&>span]:text-brand-300"
         />
 

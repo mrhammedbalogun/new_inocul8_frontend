@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
 import { getNav } from "@/lib/nav";
+import { getSiteRating } from "@/lib/settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,10 +68,11 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const nav = await getNav();
+  const rating = await getSiteRating();
   return (
     <html lang="en" className={`${geistSans.variable} ${fraunces.variable}`}>
       <body className="flex min-h-full flex-col font-sans antialiased">
-        <JsonLd data={[organizationSchema, websiteSchema]} />
+        <JsonLd data={[organizationSchema(rating), websiteSchema]} />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-white"
