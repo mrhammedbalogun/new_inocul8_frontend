@@ -54,6 +54,8 @@ export function StandalonePage({ page, crumbs }: { page: TopLevelPage; crumbs: C
                   />
                 </div>
               )}
+              {/* Migrated WP content begins at h3 — keep the heading outline sequential. */}
+              <h2 className="sr-only">Service details</h2>
               <ServiceProse html={page.html} />
             </article>
 

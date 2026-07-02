@@ -138,6 +138,8 @@ export default async function CategoryPage({ params }: Props) {
       ) : (
         <section className="py-12 sm:py-16">
           <Container className="max-w-3xl">
+            {/* Migrated WP content begins at h3 — keep the heading outline sequential. */}
+            <h2 className="sr-only">About this service</h2>
             <ServiceProse html={cat.page.html} />
             <div className="mt-10 rounded-2xl border border-brand-100 bg-brand-50/60 p-8 text-center">
               <h2 className="font-display text-2xl font-semibold text-ink-900">Ready to get started?</h2>
