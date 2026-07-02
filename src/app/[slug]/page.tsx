@@ -14,8 +14,9 @@ import { breadcrumbSchema, articleSchema } from "@/lib/schema";
 import { getPost, getAllPostSlugs, getRelatedPosts, formatDate } from "@/lib/blog";
 import { site } from "@/lib/site";
 
-// Posts keep their original root slugs; only the 70 known slugs resolve here.
-export const dynamicParams = false;
+// Posts keep their original root slugs. Known slugs are prebuilt; new CMS
+// posts render on demand (then cached), so publishing doesn't need a rebuild.
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   return (await getAllPostSlugs()).map((slug) => ({ slug }));
