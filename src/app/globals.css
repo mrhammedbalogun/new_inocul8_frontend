@@ -165,4 +165,39 @@
   .service-prose a:hover {
     color: var(--color-brand-800);
   }
+  .service-prose table {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    border: 1px solid rgba(18, 33, 31, 0.08);
+    border-radius: 0.75rem;
+  }
+  .service-prose caption {
+    caption-side: top;
+    text-align: left;
+    padding-bottom: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-brand-700);
+  }
+  .service-prose th,
+  .service-prose td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    border: 1px solid rgba(18, 33, 31, 0.08);
+  }
+  .service-prose thead th {
+    background: var(--color-brand-50);
+    color: var(--color-ink-900);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .service-prose tbody tr:nth-child(even) {
+    background: rgba(18, 33, 31, 0.02);
+  }
 }
