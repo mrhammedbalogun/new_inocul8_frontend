@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CalendarCheck, Phone } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords: page.focusKeyword ? [page.focusKeyword] : undefined,
     alternates: { canonical: page.path },
-    openGraph: { title: `${page.title} | Inocul8`, description, url: page.path, type: "article" },
+    openGraph: {
+      title: `${page.title} | Inocul8`,
+      description,
+      url: page.path,
+      type: "article",
+      images: page.image ? [page.image] : undefined,
+    },
   };
 }
 
@@ -71,6 +78,18 @@ export default async function ServicePage({ params }: Props) {
         <Container>
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
             <article className="min-w-0">
+              {page.image && (
+                <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-brand-50">
+                  <Image
+                    src={page.image}
+                    alt={page.title}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 800px"
+                    className="object-cover"
+                  />
+                </div>
+              )}
               <ServiceProse html={page.html} />
             </article>
 

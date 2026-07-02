@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icon";
@@ -52,10 +53,10 @@ export default async function CategoryPage({ params }: Props) {
   const extraSlugs = EXTRA_CATEGORY_PAGES[category] ?? [];
   const extraPages = extraSlugs.length ? await Promise.all(extraSlugs.map((slug) => getPage(slug))) : [];
   const cards = [
-    ...cat.services.map((s) => ({ key: s.slug, path: s.path, title: s.title, excerpt: s.excerpt })),
+    ...cat.services.map((s) => ({ key: s.slug, path: s.path, title: s.title, excerpt: s.excerpt, image: s.image })),
     ...extraPages
       .filter((p): p is NonNullable<typeof p> => Boolean(p))
-      .map((p) => ({ key: p.slug, path: p.path, title: p.title, excerpt: p.excerpt })),
+      .map((p) => ({ key: p.slug, path: p.path, title: p.title, excerpt: p.excerpt, image: p.image })),
   ].sort((a, b) => a.title.localeCompare(b.title, "en"));
 
   const crumbs = [
@@ -104,18 +105,31 @@ export default async function CategoryPage({ params }: Props) {
                 <Link
                   key={s.key}
                   href={s.path}
-                  className="group flex flex-col rounded-2xl border border-ink-900/8 bg-white p-6 shadow-soft transition-all hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift"
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-ink-900/8 bg-white shadow-soft transition-all hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift"
                 >
-                  <h2 className="font-display text-lg font-semibold text-ink-900 group-hover:text-brand-700">
-                    {s.title}
-                  </h2>
-                  {s.excerpt && (
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted line-clamp-3">{s.excerpt}</p>
+                  {s.image && (
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-brand-50">
+                      <Image
+                        src={s.image}
+                        alt={s.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
                   )}
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
-                    View details
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                  </span>
+                  <div className="flex flex-1 flex-col p-6">
+                    <h2 className="font-display text-lg font-semibold text-ink-900 group-hover:text-brand-700">
+                      {s.title}
+                    </h2>
+                    {s.excerpt && (
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted line-clamp-3">{s.excerpt}</p>
+                    )}
+                    <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
+                      View details
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>

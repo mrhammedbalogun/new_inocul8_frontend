@@ -20,6 +20,7 @@ export type ServicePage = {
   metaDescription: string;
   focusKeyword: string;
   html: string;
+  image: string | null;
 };
 
 export type ServiceCategory = {
@@ -78,7 +79,7 @@ const CATEGORY_META: Record<string, { label: string; icon: IconName; blurb: stri
 export const hubPage = staticPages.find((p) => p.path === WWD);
 
 // ---- API response shapes ----
-type ApiServiceList = { id: number; name: string; slug: string; summary: string };
+type ApiServiceList = { id: number; name: string; slug: string; summary: string; image: string | null };
 type ApiServiceDetail = ApiServiceList & {
   body: string; category: string; meta_title: string; meta_description: string; focus_keyword: string;
 };
@@ -99,6 +100,7 @@ function mapService(s: ApiServiceList & Partial<ApiServiceDetail>, categorySlug:
     metaDescription: s.meta_description ?? "",
     focusKeyword: s.focus_keyword ?? "",
     html: s.body ?? "",
+    image: s.image ?? null,
   };
 }
 
@@ -114,7 +116,7 @@ function mapCategory(c: ApiCategory): ServiceCategory {
       id: c.id, slug: c.slug, path: `${WWD}/${c.slug}`, parentPath: WWD,
       title: c.name, excerpt: c.summary ?? "",
       seoTitle: c.meta_title || c.name, metaDescription: c.meta_description ?? "",
-      focusKeyword: c.focus_keyword ?? "", html: c.body ?? "",
+      focusKeyword: c.focus_keyword ?? "", html: c.body ?? "", image: null,
     },
     services: (c.services ?? []).map((s) => mapService(s, c.slug)).sort((a, b) => a.title.localeCompare(b.title, "en")),
   };

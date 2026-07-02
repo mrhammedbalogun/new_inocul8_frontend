@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { CalendarCheck, Phone } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,18 @@ export function StandalonePage({ page, crumbs }: { page: TopLevelPage; crumbs: C
         <Container>
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
             <article className="min-w-0">
+              {page.image && (
+                <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-brand-50">
+                  <Image
+                    src={page.image}
+                    alt={page.title}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 800px"
+                    className="object-cover"
+                  />
+                </div>
+              )}
               <ServiceProse html={page.html} />
             </article>
 

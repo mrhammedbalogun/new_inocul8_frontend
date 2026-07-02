@@ -15,12 +15,13 @@ export type TopLevelPage = {
   metaDescription: string;
   focusKeyword: string;
   html: string;
+  image: string | null;
 };
 
-const staticPages = staticData as TopLevelPage[];
+const staticPages = staticData as unknown as TopLevelPage[];
 
 type ApiPage = {
-  id: number; title: string; slug: string; body: string;
+  id: number; title: string; slug: string; body: string; image: string | null;
   meta_title: string; meta_description: string; focus_keyword: string;
 };
 
@@ -39,6 +40,7 @@ export async function getPage(slug: string): Promise<TopLevelPage | undefined> {
     metaDescription: api.meta_description ?? "",
     focusKeyword: api.focus_keyword ?? "",
     html: api.body ?? "",
+    image: api.image ?? null,
   };
 }
 
@@ -51,6 +53,12 @@ export async function pageMetadata(slug: string, type: "article" | "website" = "
     description: p.metaDescription || p.excerpt,
     keywords: p.focusKeyword ? [p.focusKeyword] : undefined,
     alternates: { canonical: p.path },
-    openGraph: { title: `${p.title} | Inocul8`, description: p.metaDescription, url: p.path, type },
+    openGraph: {
+      title: `${p.title} | Inocul8`,
+      description: p.metaDescription,
+      url: p.path,
+      type,
+      images: p.image ? [p.image] : undefined,
+    },
   };
 }
