@@ -47,7 +47,15 @@ export type HomeContent = {
 export type Stat = { value: string; label: string };
 export type ValueProp = { title: string; body: string; icon: IconName };
 export type ProcessStep = { title: string; body: string };
-export type Testimonial = { quote: string; name: string; role: string; rating: number };
+export type Testimonial = {
+  quote: string;
+  name: string;
+  role: string;
+  rating: number;
+  /** "google" when synced from Google reviews; links the card to its source. */
+  source?: "manual" | "google";
+  reviewUrl?: string;
+};
 export type ServiceCard = { title: string; body: string; href: string; icon: IconName };
 export type HomeFaq = { q: string; a: string };
 export type BlogTeaser = { title: string; href: string; category: string; excerpt: string };
@@ -63,9 +71,12 @@ export type HomeData = {
   blog_teasers: BlogTeaser[];
 };
 
-// API shape: faqs come through as {question, answer}; everything else matches.
-type ApiHome = Omit<HomeData, "faqs"> & {
+// API shape: faqs come through as {question, answer}; testimonials carry
+// snake_case Google-review provenance; everything else matches.
+type ApiTestimonial = Testimonial & { source?: "manual" | "google"; review_url?: string };
+type ApiHome = Omit<HomeData, "faqs" | "testimonials"> & {
   faqs: { question: string; answer: string }[];
+  testimonials: ApiTestimonial[];
 };
 
 export const HOME_CONTENT_FALLBACK: HomeContent = {
@@ -144,6 +155,14 @@ export async function getHome(): Promise<HomeData> {
   return {
     ...data,
     faqs: data.faqs.map((f) => ({ q: f.question, a: f.answer })),
+    testimonials: data.testimonials.map((t) => ({
+      quote: t.quote,
+      name: t.name,
+      role: t.role,
+      rating: t.rating,
+      source: t.source,
+      reviewUrl: t.review_url || undefined,
+    })),
   };
 }
 

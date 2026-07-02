@@ -101,6 +101,29 @@
     color: transparent;
   }
 
+  /* Endless testimonial slider (see Testimonials). Track holds two copies of
+     the list and translates by half its width for a seamless loop. */
+  .marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  }
+  .marquee-track {
+    animation: marquee var(--marquee-duration, 45s) linear infinite;
+  }
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee { overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
+    .marquee-track { animation: none; }
+  }
+
   /* Typography for migrated service-page content (see ServiceProse). */
   .service-prose {
     color: var(--color-ink-800);
