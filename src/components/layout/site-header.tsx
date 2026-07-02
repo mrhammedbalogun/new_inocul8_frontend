@@ -192,6 +192,7 @@ function MobileDrawer({
         )}
         role="dialog"
         aria-modal="true"
+        aria-label="Mobile navigation"
       >
         <div className="flex h-16 items-center justify-between border-b border-ink-900/10 px-5">
           <Logo />

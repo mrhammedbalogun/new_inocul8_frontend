@@ -35,7 +35,7 @@ export function NewsletterForm() {
       />
       <button
         type="submit"
-        className="flex h-12 shrink-0 items-center gap-1.5 rounded-full bg-brand-500 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-400"
+        className="flex h-12 shrink-0 items-center gap-1.5 rounded-full bg-brand-500 px-5 text-sm font-semibold text-brand-950 transition-colors hover:bg-brand-400"
       >
         Subscribe <ArrowRight className="size-4" />
       </button>

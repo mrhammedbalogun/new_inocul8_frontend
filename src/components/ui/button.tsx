@@ -11,7 +11,7 @@ const buttonVariants = cva(
         primary:
           "bg-brand-600 text-white shadow-soft hover:bg-brand-700 hover:shadow-lift",
         accent:
-          "bg-accent-500 text-white shadow-soft hover:bg-accent-600 hover:shadow-lift",
+          "bg-accent-500 text-brand-950 shadow-soft hover:bg-accent-400 hover:shadow-lift",
         outline:
           "border-2 border-brand-600 text-brand-700 hover:bg-brand-50",
         ghost: "text-brand-700 hover:bg-brand-50",

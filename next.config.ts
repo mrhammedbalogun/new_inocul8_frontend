@@ -62,6 +62,8 @@ const nextConfig: NextConfig = {
       // Booking app pending (Stage 5) — temporary redirect until it ships,
       // then flip to a 301 → https://booking.inocul8.com.ng/
       { source: "/book-now", destination: "/contact", permanent: false },
+      // Site-wide Book CTAs point at /book (future booking app route)
+      { source: "/book", destination: "/contact", permanent: false },
     ];
   },
 };

@@ -15,7 +15,7 @@ export function MobileBookBar() {
         </a>
         <a
           href={site.bookingUrl}
-          className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-accent-500 font-semibold text-white shadow-soft"
+          className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-accent-500 font-semibold text-brand-950 shadow-soft"
         >
           <CalendarCheck className="size-5" /> Book an Appointment
         </a>

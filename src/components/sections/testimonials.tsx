@@ -18,7 +18,7 @@ export function Testimonials({
           eyebrow={content.testimonials_eyebrow}
           title={<span className="text-white">{content.testimonials_title}</span>}
           description={fillRating(content.testimonials_description, site.rating.value, site.rating.count)}
-          className="[&_p]:text-white/60"
+          className="[&_p]:text-white/60 [&>span]:text-brand-300"
         />
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
