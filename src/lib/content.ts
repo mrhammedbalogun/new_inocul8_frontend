@@ -67,7 +67,6 @@ export const whyUs = [
 
 export const stats = [
   { value: "4.9★", label: "Average rating (59+ reviews)" },
-  { value: "10 min", label: "Typical appointment time" },
   { value: "30+", label: "Vaccines & health services" },
   { value: "Doorstep", label: "Home, office or access point" },
 ] as const;
