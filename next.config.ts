@@ -39,6 +39,31 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  // Migration redirects per docs/02-ranking-pages.md (toolkit repo). The
+  // spam/WooCommerce 410s live in src/middleware.ts (redirects can't send 410).
+  async redirects() {
+    return [
+      // Legacy slug normalization
+      { source: "/hepatitisb", destination: "/hepatitis-b", permanent: true },
+      // Duplicate-post canonicalization (GSC: both rank; keep the original)
+      {
+        source: "/yellow-fever-card-how-to-know-if-its-original-or-fake-2",
+        destination: "/yellow-fever-card-how-to-know-if-its-original-or-fake",
+        permanent: true,
+      },
+      // WP category archives → new blog category paths
+      { source: "/category/uncategorized", destination: "/blog/category/talk-vaccines", permanent: true },
+      { source: "/category/travel-health-blog", destination: "/blog/category/travel-health", permanent: true },
+      { source: "/category/travel-vaccine", destination: "/blog/category/travel-health", permanent: true },
+      { source: "/category/:slug", destination: "/blog/category/:slug", permanent: true },
+      // WooCommerce dropped: shop → services hub
+      { source: "/shop", destination: "/what-we-do", permanent: true },
+      { source: "/shop/:path*", destination: "/what-we-do", permanent: true },
+      // Booking app pending (Stage 5) — temporary redirect until it ships,
+      // then flip to a 301 → https://booking.inocul8.com.ng/
+      { source: "/book-now", destination: "/contact", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;
