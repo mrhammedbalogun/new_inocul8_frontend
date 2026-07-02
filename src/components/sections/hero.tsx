@@ -1,14 +1,15 @@
-import { Star, ShieldCheck, Clock, Home } from "lucide-react";
+import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { Icon } from "@/components/ui/icon";
 import { site, whatsappHref } from "@/lib/site";
 import { fillRating, HOME_CONTENT_FALLBACK, type HomeContent } from "@/lib/home";
 
 const trustPoints = [
-  { Icon: Home, label: "At your doorstep" },
-  { Icon: Clock, label: "Under 10 minutes" },
-  { Icon: ShieldCheck, label: "Certified vaccines" },
-];
+  { icon: "map-pin", label: "Convenient" },
+  { icon: "wallet", label: "Affordable" },
+  { icon: "clock", label: "Timeliness" },
+] as const;
 
 export function Hero({ content = HOME_CONTENT_FALLBACK }: { content?: HomeContent }) {
   // Split the title so the highlight tail renders in the brand gradient.
@@ -48,10 +49,10 @@ export function Hero({ content = HOME_CONTENT_FALLBACK }: { content?: HomeConten
           </div>
 
           <ul className="mt-9 flex flex-wrap gap-x-7 gap-y-3">
-            {trustPoints.map(({ Icon, label }) => (
+            {trustPoints.map(({ icon, label }) => (
               <li key={label} className="flex items-center gap-2 text-sm font-medium text-ink-700">
                 <span className="grid size-7 place-items-center rounded-full bg-brand-100 text-brand-700">
-                  <Icon className="size-4" />
+                  <Icon name={icon} className="size-4" />
                 </span>
                 {label}
               </li>
