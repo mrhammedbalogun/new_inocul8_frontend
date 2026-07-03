@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Clock, Calendar } from "lucide-react";
+import { Clock, Calendar, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Breadcrumbs } from "@/components/service/breadcrumbs";
 import { ServiceProse } from "@/components/service/service-prose";
@@ -93,6 +93,10 @@ export default async function PostPage({ params }: Props) {
               <Clock className="size-4" />
               {post.readingMinutes} min read
             </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
+              <ShieldCheck className="size-4" />
+              Medically reviewed
+            </span>
           </div>
           <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-ink-900 sm:text-4xl">
             {post.title}
@@ -128,9 +132,10 @@ export default async function PostPage({ params }: Props) {
               I8
             </span>
             <div>
-              <p className="font-semibold text-ink-900">The Inocul8 Team</p>
+              <p className="font-semibold text-ink-900">The Inocul8 Clinical Team</p>
               <p className="mt-0.5 text-sm text-muted">
-                Preventive-health writers and clinicians sharing trustworthy vaccine guidance for Nigeria.
+                Written and medically reviewed by Inocul8&rsquo;s preventive-health clinicians —
+                trustworthy vaccine guidance for Nigeria. Last reviewed {formatDate(post.modified || post.date)}.
               </p>
             </div>
           </div>

@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
   // Migration redirects per docs/02-ranking-pages.md (toolkit repo). The
-  // spam/WooCommerce 410s live in src/middleware.ts (redirects can't send 410).
+  // spam/WooCommerce 410s live in src/proxy.ts (redirects can't send 410).
   async redirects() {
     return [
       // Legacy slug normalization
@@ -59,11 +59,10 @@ const nextConfig: NextConfig = {
       // WooCommerce dropped: shop → services hub
       { source: "/shop", destination: "/what-we-do", permanent: true },
       { source: "/shop/:path*", destination: "/what-we-do", permanent: true },
-      // Booking app pending (Stage 5) — temporary redirect until it ships,
-      // then flip to a 301 → https://booking.inocul8.com.ng/
-      { source: "/book-now", destination: "/contact", permanent: false },
-      // Site-wide Book CTAs point at /book (future booking app route)
-      { source: "/book", destination: "/contact", permanent: false },
+      // Booking is handled externally by Cowva. Preserve the legacy /book-now
+      // SEO URL with a permanent 301 to the external booking page.
+      { source: "/book-now", destination: "https://booking.cowva.com/inocul8", permanent: true },
+      { source: "/book", destination: "https://booking.cowva.com/inocul8", permanent: true },
     ];
   },
 };

@@ -89,7 +89,19 @@ export function articleSchema(opts: {
     description: opts.description,
     datePublished: new Date(opts.datePublished.replace(" ", "T")).toISOString(),
     dateModified: new Date((opts.dateModified || opts.datePublished).replace(" ", "T")).toISOString(),
-    author: { "@id": `${site.url}/#organization` },
+    // E-E-A-T: name a subject-matter author + a medical review signal for YMYL
+    // health content (weighted heavily by Search and AI assistants).
+    author: {
+      "@type": "Organization",
+      name: "The Inocul8 Clinical Team",
+      url: `${site.url}/about-us`,
+    },
+    reviewedBy: {
+      "@type": "Organization",
+      name: "The Inocul8 Clinical Team",
+      url: `${site.url}/about-us`,
+    },
+    lastReviewed: new Date((opts.dateModified || opts.datePublished).replace(" ", "T")).toISOString(),
     publisher: { "@id": `${site.url}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${site.url}${opts.path}` },
     url: `${site.url}${opts.path}`,

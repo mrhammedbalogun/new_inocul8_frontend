@@ -15,7 +15,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getCategories(),
   ]);
   const blogRoutes = blogCategories.map((c) => `/blog/category/${c.slug}`);
-  const postEntries = posts.map((p) => ({ path: `/${p.slug}`, lastModified: p.modified || p.date }));
+  // Slugs that 301-redirect elsewhere (see next.config redirects) must not be
+  // advertised in the sitemap — canonicalize to the destination instead.
+  const REDIRECTED_SLUGS = new Set(["yellow-fever-card-how-to-know-if-its-original-or-fake-2"]);
+  const postEntries = posts
+    .filter((p) => !REDIRECTED_SLUGS.has(p.slug))
+    .map((p) => ({ path: `/${p.slug}`, lastModified: p.modified || p.date }));
 
   const seen = new Set<string>();
   const pageEntries = [...staticRoutes, ...menuRoutes, ...serviceRoutes, ...blogRoutes]

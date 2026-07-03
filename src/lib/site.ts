@@ -25,7 +25,9 @@ export const site = {
     twitter: "https://twitter.com/inocul8",
     linkedin: "https://linkedin.com/company/inocul8",
   },
-  bookingUrl: "/book",
+  // External booking is handled by Cowva. Every "Book" CTA resolves here; the
+  // Button component opens absolute http(s) URLs in a new tab with rel=noopener.
+  bookingUrl: "https://booking.cowva.com/inocul8",
 } as const;
 
 export const phoneHref = `tel:+234${site.phones[0].replace(/^0/, "")}`;
