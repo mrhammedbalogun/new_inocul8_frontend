@@ -99,7 +99,7 @@ export default async function ServicePage({ params }: Props) {
               <div className="rounded-2xl border border-ink-900/8 bg-white p-6 shadow-soft">
                 <h2 className="font-display text-lg font-semibold text-ink-900">Book this service</h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted">
-                  Reserve a slot at home, at the office, or at an access point near you. Most
+                  Reserve a slot at an access point near you. Most
                   appointments are done in under 10 minutes.
                 </p>
                 <div className="mt-5 grid gap-3">

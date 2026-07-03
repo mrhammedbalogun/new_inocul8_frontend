@@ -81,8 +81,8 @@ type ApiHome = Omit<HomeData, "faqs" | "testimonials"> & {
 
 export const HOME_CONTENT_FALLBACK: HomeContent = {
   hero_badge: "Rated {rating} by {count}+ patients",
-  hero_title: "Vaccination & preventive care, at your doorstep.",
-  hero_title_highlight: "at your doorstep.",
+  hero_title: "Vaccination & preventive care, at your convenience.",
+  hero_title_highlight: "at your convenience.",
   hero_subtitle:
     "Convenient, affordable and timely immunization for your family and your team — childhood vaccines, travel health & yellow fever cards, and adult vaccines across Lagos.",
   hero_cta_primary: "Book an Appointment",
@@ -93,7 +93,7 @@ export const HOME_CONTENT_FALLBACK: HomeContent = {
     "From a baby's first shots to a healthier workforce, Inocul8 covers every stage of preventive care.",
   steps_eyebrow: "How It Works",
   steps_title: "Protected in three simple steps",
-  steps_description: "No queues, no guesswork. Book in minutes and get care wherever you are.",
+  steps_description: "No queues, no guesswork. Book in minutes and get seen at an access point near you.",
   steps_cta_label: "Book Now",
   whyus_eyebrow: "Why Choose Us",
   whyus_title: "Your trusted preventive-health partner",
@@ -113,7 +113,7 @@ export const HOME_CONTENT_FALLBACK: HomeContent = {
     "Everything you need to know before you book. Still unsure? Reach out — we're happy to help.",
   cta_title: "Ready to protect what matters most?",
   cta_description:
-    "Book a vaccination or a free consultation today — at your home, office, or an access point near you.",
+    "Book a vaccination or a free consultation today — at an access point near you.",
 };
 
 /** Static design content, used both as the API fallback and as section defaults

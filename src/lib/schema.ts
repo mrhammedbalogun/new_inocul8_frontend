@@ -12,7 +12,7 @@ export const organizationSchema = (rating: { value: number; count: number } = si
   email: site.email,
   telephone: phoneIntl,
   description: site.description,
-  slogan: "Convenient and affordable vaccination and preventive health services at your doorstep.",
+  slogan: "Convenient and affordable vaccination and preventive health services at your convenience across Lagos.",
   medicalSpecialty: ["PublicHealth", "PreventiveMedicine"],
   address: {
     "@type": "PostalAddress",

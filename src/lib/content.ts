@@ -34,7 +34,7 @@ export const steps = [
   },
   {
     title: "Book & pay online",
-    body: "Reserve a slot at home, at the office, or at an access point near you, and complete payment securely.",
+    body: "Reserve a slot at an access point near you, and complete payment securely.",
   },
   {
     title: "Get protected",
@@ -45,7 +45,7 @@ export const steps = [
 export const whyUs = [
   {
     title: "Convenient",
-    body: "We put your comfort first — get care at home, at the office, or any access point near you.",
+    body: "We put your comfort first — get care at an access point near you, on your schedule.",
     icon: "map-pin",
   },
   {
@@ -68,13 +68,13 @@ export const whyUs = [
 export const stats = [
   { value: "4.9★", label: "Average rating (59+ reviews)" },
   { value: "30+", label: "Vaccines & health services" },
-  { value: "Doorstep", label: "Home, office or access point" },
+  { value: "Near you", label: "Access points across Lagos" },
 ] as const;
 
 export const testimonials = [
   {
     quote:
-      "Got my yellow fever card the same day without stress. The nurse came to my office and I was done in minutes. Highly recommend Inocul8.",
+      "Got my yellow fever card the same day without stress. Quick, professional, and I was done in minutes. Highly recommend Inocul8.",
     name: "Adaeze O.",
     role: "Frequent traveller, Lagos",
   },
@@ -94,8 +94,8 @@ export const testimonials = [
 
 export const faqs = [
   {
-    q: "Do you come to my home or office?",
-    a: "Yes. Inocul8 offers doorstep vaccination — at your home, office, or any of our access points near you. Select home or on-site delivery when you book.",
+    q: "Where can I get vaccinated?",
+    a: "At our Ajah clinic or any of our access points near you — pick the location and time that suit you when you book. For companies, we also run on-site vaccination and screening sessions at your workplace.",
   },
   {
     q: "How do I get a yellow fever card in Lagos?",

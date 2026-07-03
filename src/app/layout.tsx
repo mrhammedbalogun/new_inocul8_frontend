@@ -25,7 +25,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: "Inocul8 — Vaccination & Preventive Health at Your Doorstep | Lagos",
+    default: "Inocul8 — Vaccination & Preventive Health at Your Convenience | Lagos",
     template: "%s | Inocul8",
   },
   description: site.description,
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     "travel vaccines Nigeria",
     "childhood immunization Lagos",
     "HPV vaccine Nigeria",
-    "doorstep vaccination",
+    "vaccination clinic Lagos",
   ],
   applicationName: site.name,
   authors: [{ name: site.name }],
@@ -45,12 +45,12 @@ export const metadata: Metadata = {
     locale: "en_NG",
     url: site.url,
     siteName: site.name,
-    title: "Inocul8 — Vaccination & Preventive Health at Your Doorstep",
+    title: "Inocul8 — Vaccination & Preventive Health at Your Convenience",
     description: site.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Inocul8 — Vaccination & Preventive Health at Your Doorstep",
+    title: "Inocul8 — Vaccination & Preventive Health at Your Convenience",
     description: site.description,
   },
   robots: {

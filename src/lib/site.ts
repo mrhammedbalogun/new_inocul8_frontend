@@ -6,7 +6,7 @@ export const site = {
   legalName: "Inocul8",
   tagline: "Convenient · Timely · Safe",
   description:
-    "Convenient and affordable vaccination and preventive health services at your doorstep. Childhood immunization, travel health & yellow fever cards, adult vaccines, and corporate wellness in Lagos, Nigeria.",
+    "Convenient and affordable vaccination and preventive health services at your convenience across Lagos — childhood immunization, travel health & yellow fever cards, adult vaccines, and corporate wellness in Nigeria.",
   url: "https://inocul8.com.ng",
   email: "info@inocul8.com.ng",
   phones: ["07063736485", "08160962414"],

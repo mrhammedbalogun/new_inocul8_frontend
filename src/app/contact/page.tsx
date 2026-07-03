@@ -57,7 +57,8 @@ export default function ContactPage() {
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-muted">
               Questions, bookings or corporate enquiries — reach out and our team will respond
-              promptly. We also come to your home, office or an access point near you.
+              promptly. Get vaccinated at our Ajah clinic or an access point near you, with on-site
+              sessions available for corporate teams.
             </p>
           </div>
         </Container>

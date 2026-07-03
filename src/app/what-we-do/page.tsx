@@ -50,7 +50,7 @@ export default async function WhatWeDoPage() {
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-muted">
               From a baby&apos;s first shots to a healthier workforce, Inocul8 delivers convenient,
-              affordable vaccination and preventive care at your doorstep across Lagos.
+              affordable vaccination and preventive care at your convenience across Lagos.
             </p>
           </div>
         </Container>

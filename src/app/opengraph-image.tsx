@@ -4,7 +4,7 @@ import { site } from "@/lib/site";
 // Default social / AI link-card image, inherited by every route that doesn't
 // set its own openGraph.images (e.g. blog posts). Service pages override with
 // their featured image. 1200×630 is the standard OG/Twitter large-card size.
-export const alt = "Inocul8 — Vaccination & preventive health at your doorstep, Lagos";
+export const alt = "Inocul8 — Vaccination & preventive health at your convenience, Lagos";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -31,7 +31,7 @@ export default function OpengraphImage() {
 
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 68, fontWeight: 700, lineHeight: 1.05, letterSpacing: -1.5, maxWidth: 920 }}>
-            Vaccination &amp; preventive health, at your doorstep
+            Vaccination &amp; preventive health, at your convenience
           </div>
           <div style={{ fontSize: 30, marginTop: 24, color: "rgba(255,255,255,0.82)" }}>
             Childhood immunization · Travel health &amp; yellow fever cards · Adult vaccines · Lagos

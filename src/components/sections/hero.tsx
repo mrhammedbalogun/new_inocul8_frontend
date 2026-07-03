@@ -74,10 +74,10 @@ export function Hero({
             <div className="absolute inset-x-0 bottom-0 p-6">
               <div className="rounded-2xl bg-white/95 p-5 shadow-soft backdrop-blur">
                 <p className="font-display text-lg font-semibold text-ink-900">
-                  Care that comes to you
+                  Care on your schedule
                 </p>
                 <p className="mt-1 text-sm text-muted">
-                  Home, office, or an access point near you — you choose where.
+                  Book an access point near you — at a time that works for you.
                 </p>
               </div>
             </div>
