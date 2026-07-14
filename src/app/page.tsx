@@ -1,5 +1,6 @@
 import { Hero } from "@/components/sections/hero";
 import { TrustBar } from "@/components/sections/trust-bar";
+import { Prevention } from "@/components/sections/prevention";
 import { Services } from "@/components/sections/services";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { WhyUs } from "@/components/sections/why-us";
@@ -22,6 +23,7 @@ export default async function HomePage() {
       <JsonLd data={faqSchemaFrom(home.faqs)} />
       <Hero content={content} rating={rating} />
       <TrustBar stats={home.stats} />
+      <Prevention />
       <Services content={content} cards={home.service_cards} />
       <HowItWorks content={content} steps={home.steps} />
       <WhyUs content={content} items={home.value_props} />
