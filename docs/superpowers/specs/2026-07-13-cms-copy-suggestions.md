@@ -9,6 +9,10 @@ Positioning note: the current build is clinic + access points + corporate
 on-site (no doorstep/home-visit language) — every suggestion below respects
 that.
 
+⚠️ Ordering now matters in the admin: the **first service card** renders as
+the large featured gradient tile, and the **first blog teaser** renders as
+the tall featured article. Put your strongest item first in each list.
+
 | Field | Current (fallback) | Suggested |
 |---|---|---|
 | hero_badge | `Rated {rating} by {count}+ patients` | Keep as is — clear, specific, and the placeholders already do the proof-point work. |
