@@ -47,11 +47,18 @@
   --shadow-lift: 0 12px 40px -12px rgba(12, 136, 126, 0.35);
 
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --shadow-float: 0 24px 60px -20px rgba(16, 63, 60, 0.28), 0 8px 20px -8px rgba(16, 63, 60, 0.1);
+  --animate-float: float-y 5s ease-in-out infinite alternate;
 }
 
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float-y {
+  from { transform: translateY(-6px); }
+  to { transform: translateY(6px); }
 }
 
 @layer base {
@@ -93,6 +100,14 @@
     background-image:
       radial-gradient(60% 60% at 15% 0%, rgba(52, 190, 179, 0.14) 0%, transparent 60%),
       radial-gradient(50% 50% at 100% 20%, rgba(102, 212, 202, 0.16) 0%, transparent 55%);
+  }
+
+  /* Warmer hero mesh: teal + a whisper of coral so the page opens warm. */
+  .bg-mesh-warm {
+    background-image:
+      radial-gradient(55% 55% at 12% 0%, rgba(52, 190, 179, 0.16) 0%, transparent 60%),
+      radial-gradient(45% 45% at 95% 12%, rgba(255, 122, 89, 0.09) 0%, transparent 55%),
+      radial-gradient(50% 60% at 70% 90%, rgba(102, 212, 202, 0.12) 0%, transparent 60%);
   }
   .text-gradient {
     background: linear-gradient(120deg, var(--color-brand-600), var(--color-brand-400));
