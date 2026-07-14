@@ -1,4 +1,4 @@
-import { Star, Quote, ExternalLink } from "lucide-react";
+import { Star, Quote, ExternalLink, BadgeCheck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { site } from "@/lib/site";
@@ -16,14 +16,23 @@ function TestimonialCard({ t, hidden = false }: { t: Testimonial; hidden?: boole
           <Star key={i} className="size-4 fill-gold-400 text-gold-400" />
         ))}
       </div>
-      <figcaption className="mt-3 flex items-end justify-between gap-3">
-        <span>
-          <span className="block text-sm font-semibold text-white">{t.name}</span>
-          <span className="block text-xs text-white/50">{t.role}</span>
+      <figcaption className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+        <span className="flex items-center gap-3">
+          <span
+            aria-hidden
+            className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-sm font-semibold text-white"
+          >
+            {t.name.trim().charAt(0).toUpperCase()}
+          </span>
+          <span>
+            <span className="block text-sm font-semibold text-white">{t.name}</span>
+            <span className="block text-xs text-white/50">{t.role}</span>
+          </span>
         </span>
-        {t.reviewUrl && (
-          <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-300">
-            View on Google <ExternalLink className="size-3" />
+        {(t.source === "google" || t.reviewUrl) && (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-brand-300">
+            <BadgeCheck className="size-3.5" /> Verified
+            {t.reviewUrl && <ExternalLink className="size-3" />}
           </span>
         )}
       </figcaption>
