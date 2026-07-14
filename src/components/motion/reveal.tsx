@@ -5,6 +5,7 @@
 // wrapper is a client island. Respects prefers-reduced-motion.
 import { m, useReducedMotion } from "motion/react";
 
+import { cn } from "@/lib/utils";
 import { MotionLazy } from "./lazy";
 
 export function Reveal({
@@ -22,7 +23,7 @@ export function Reveal({
   return (
     <MotionLazy>
       <m.div
-        className={className}
+        className={cn("rm-static", className)}
         initial={reduce ? false : { opacity: 0, y }}
         whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}

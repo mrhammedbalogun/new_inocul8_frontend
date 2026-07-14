@@ -48,7 +48,7 @@ export function HeroVisual({ rating = site.rating }: { rating?: { value: number;
         <div className="absolute bottom-8 left-2 size-32 rounded-full bg-accent-400/20 blur-2xl" />
 
         {/* Vaccination record — the anchor card */}
-        <m.div {...enter(0.15)} style={reduce ? undefined : { x: farX, y: farY }} className="absolute left-1/2 top-1/2 w-[min(72%,300px)] -translate-x-1/2 -translate-y-1/2">
+        <m.div {...enter(0.15)} style={reduce ? undefined : { x: farX, y: farY }} className="rm-static absolute left-1/2 top-1/2 w-[min(72%,300px)] -translate-x-1/2 -translate-y-1/2">
           <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-float backdrop-blur-md">
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-xl bg-brand-600 text-white">
@@ -83,7 +83,7 @@ export function HeroVisual({ rating = site.rating }: { rating?: { value: number;
         </m.div>
 
         {/* Appointment confirmed */}
-        <m.div {...enter(0.35)} style={reduce ? undefined : { x: nearX, y: nearY }} className="absolute -left-1 top-6 w-[min(58%,230px)] animate-float sm:left-0">
+        <m.div {...enter(0.35)} style={reduce ? undefined : { x: nearX, y: nearY }} className="rm-static absolute -left-1 top-6 w-[min(58%,230px)] animate-float sm:left-0">
           <div className="rounded-2xl border border-white/60 bg-white/90 p-4 shadow-float backdrop-blur-md">
             <div className="flex items-center gap-2.5">
               <span className="grid size-8 place-items-center rounded-lg bg-accent-500/15 text-accent-600">
@@ -96,7 +96,7 @@ export function HeroVisual({ rating = site.rating }: { rating?: { value: number;
         </m.div>
 
         {/* Yellow fever card */}
-        <m.div {...enter(0.5)} style={reduce ? undefined : { x: nearX, y: nearY }} className="absolute -right-1 bottom-6 hidden w-[min(56%,220px)] animate-float [animation-delay:1.2s] sm:right-0 sm:block">
+        <m.div {...enter(0.5)} style={reduce ? undefined : { x: nearX, y: nearY }} className="rm-static absolute -right-1 bottom-6 hidden w-[min(56%,220px)] animate-float [animation-delay:1.2s] sm:right-0 sm:block">
           <div className="rounded-2xl border border-white/60 bg-white/90 p-4 shadow-float backdrop-blur-md">
             <div className="flex items-center gap-2.5">
               <span className="grid size-8 place-items-center rounded-lg bg-gold-400/20 text-gold-500">
@@ -109,7 +109,7 @@ export function HeroVisual({ rating = site.rating }: { rating?: { value: number;
         </m.div>
 
         {/* Google rating badge */}
-        <m.div {...enter(0.65)} style={reduce ? undefined : { x: farX, y: farY }} className="absolute bottom-2 left-6 sm:left-10">
+        <m.div {...enter(0.65)} style={reduce ? undefined : { x: farX, y: farY }} className="rm-static absolute bottom-2 left-6 sm:left-10">
           <div className="flex items-center gap-2 rounded-full border border-white/60 bg-white/90 py-2 pl-3 pr-4 shadow-float backdrop-blur-md">
             <span className="flex">
               {Array.from({ length: 5 }).map((_, i) => (

@@ -3,6 +3,7 @@
 // Horizontal line that "draws" itself when scrolled into view — used as the
 // connector behind the booking-steps timeline.
 import { m, useReducedMotion } from "motion/react";
+import { cn } from "@/lib/utils";
 import { MotionLazy } from "./lazy";
 
 export function ProgressLine({ className }: { className?: string }) {
@@ -11,7 +12,7 @@ export function ProgressLine({ className }: { className?: string }) {
     <MotionLazy>
       <m.span
         aria-hidden
-        className={className}
+        className={cn("rm-static", className)}
         style={{ originX: 0 }}
         initial={reduce ? false : { scaleX: 0 }}
         whileInView={reduce ? undefined : { scaleX: 1 }}
