@@ -52,5 +52,5 @@ export const corporate = {
 export const heroTrustLine = [
   "Certified vaccines",
   "Same-day yellow fever cards",
-  "Pay-small-small plans",
+  "Licensed, expert vaccinators",
 ] as const;
