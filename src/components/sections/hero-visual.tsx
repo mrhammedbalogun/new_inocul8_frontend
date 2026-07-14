@@ -96,7 +96,7 @@ export function HeroVisual({ rating = site.rating }: { rating?: { value: number;
         </m.div>
 
         {/* Yellow fever card */}
-        <m.div {...enter(0.5)} style={reduce ? undefined : { x: nearX, y: nearY }} className="absolute -right-1 bottom-16 hidden w-[min(56%,220px)] animate-float [animation-delay:1.2s] sm:right-0 sm:block">
+        <m.div {...enter(0.5)} style={reduce ? undefined : { x: nearX, y: nearY }} className="absolute -right-1 bottom-6 hidden w-[min(56%,220px)] animate-float [animation-delay:1.2s] sm:right-0 sm:block">
           <div className="rounded-2xl border border-white/60 bg-white/90 p-4 shadow-float backdrop-blur-md">
             <div className="flex items-center gap-2.5">
               <span className="grid size-8 place-items-center rounded-lg bg-gold-400/20 text-gold-500">

@@ -17,7 +17,7 @@ export function Corporate() {
           <div className="relative overflow-hidden rounded-[2rem] bg-ink-950 px-8 py-14 sm:px-14 lg:px-20">
             <div
               aria-hidden
-              className="absolute inset-0 opacity-60 [background-image:radial-gradient(50%_60%_at_85%_10%,rgba(20,168,156,0.25),transparent_60%),radial-gradient(40%_50%_at_10%_90%,rgba(20,168,156,0.15),transparent_55%)]"
+              className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(50%_60%_at_85%_10%,rgba(20,168,156,0.25),transparent_60%),radial-gradient(40%_50%_at_10%_90%,rgba(20,168,156,0.15),transparent_55%)]"
             />
             <div className="relative grid gap-10 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-6">
@@ -35,7 +35,7 @@ export function Corporate() {
                   <Button
                     href={whatsappHref}
                     size="lg"
-                    className="border-2 border-white/25 bg-transparent text-white hover:bg-white/10"
+                    className="border-2 border-white/25 bg-transparent text-white shadow-none hover:bg-white/10"
                   >
                     Chat with our team
                   </Button>
