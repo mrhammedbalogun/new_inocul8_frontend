@@ -13,12 +13,12 @@ export const prevention = {
   eyebrow: "Why Prevention",
   title: "The best treatment is the one you never need",
   description:
-    "Vaccine-preventable diseases still send thousands of Nigerian families to hospital every year. Staying protected is simpler — and far cheaper — than treating an illness after it strikes.",
+    "Vaccine-preventable diseases still put Nigerian families in hospital every year. Staying protected is simpler — and usually far cheaper — than treating an illness after it strikes.",
   points: [
     {
       icon: "wallet",
       title: "A fraction of the cost of treatment",
-      body: "A single hospital admission for a preventable disease can cost 10× more than the vaccine that stops it. Prevention protects your health and your pocket.",
+      body: "A hospital admission for a preventable disease often costs many times more than the vaccine that stops it. Prevention protects your health and your pocket.",
     },
     {
       icon: "shield-check",
@@ -43,7 +43,7 @@ export const corporate = {
   points: [
     { title: "On-site vaccination days", body: "We come to your office with certified vaccines, licensed staff and full cold-chain handling." },
     { title: "Screenings & health talks", body: "Practical wellness sessions and health checks your team will actually use." },
-    { title: "Fewer sick days", body: "Immunized teams lose fewer days to preventable illness — HR sees it in the numbers." },
+    { title: "Fewer sick days", body: "Immunized teams lose fewer days to preventable illness — a healthier workforce your HR metrics will thank you for." },
   ],
   ctaLabel: "Request a corporate proposal",
   ctaHref: "/contact",
