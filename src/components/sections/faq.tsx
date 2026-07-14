@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { cn } from "@/lib/utils";
 import { HOME_CONTENT_FALLBACK, HOME_FALLBACK, type HomeContent, type HomeFaq } from "@/lib/home";
+import { whatsappHref } from "@/lib/site";
 
 export function Faq({
   content = HOME_CONTENT_FALLBACK,
@@ -56,6 +57,19 @@ export function Faq({
             );
           })}
         </div>
+
+        <p className="mt-8 text-center text-sm text-muted">
+          Still unsure?{" "}
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800"
+          >
+            Chat with us on WhatsApp
+          </a>{" "}
+          — we reply within minutes.
+        </p>
       </Container>
     </section>
   );

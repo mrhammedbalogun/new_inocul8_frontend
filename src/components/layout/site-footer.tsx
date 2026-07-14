@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { MapPin, Mail, Phone, Clock } from "lucide-react";
+import { MapPin, Mail, Phone, Clock, MessageCircle, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { InstagramIcon, FacebookIcon, XIcon, LinkedinIcon } from "@/components/brand/social-icons";
 import { Container } from "@/components/ui/container";
 import { NewsletterForm } from "@/components/newsletter-form";
-import { site, footerServices, mainNav, phoneHref, type NavLink } from "@/lib/site";
+import { site, footerServices, mainNav, phoneHref, whatsappHref, type NavLink } from "@/lib/site";
 
 const DEFAULT_LEGAL: NavLink[] = [
   { label: "Privacy Policy", href: "/privacy-policy" },
@@ -22,7 +22,7 @@ export function SiteFooter({
 }) {
   const year = new Date().getFullYear();
   return (
-    <footer className="bg-ink-900 text-white/70">
+    <footer className="bg-ink-950 text-white/70">
       {/* Newsletter strip */}
       <div className="border-b border-white/10">
         <Container className="grid gap-6 py-10 md:grid-cols-2 md:items-center">
@@ -114,12 +114,33 @@ export function SiteFooter({
               </a>
             </li>
             <li className="flex gap-3">
+              <MessageCircle className="mt-0.5 size-4 shrink-0 text-brand-400" />
+              <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-brand-300">
+                Chat on WhatsApp
+              </a>
+            </li>
+            <li className="flex gap-3">
               <Clock className="mt-0.5 size-4 shrink-0 text-brand-400" />
               <span>{site.hours}</span>
             </li>
           </ul>
         </div>
       </Container>
+
+      <div className="border-t border-white/10">
+        <Container className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 py-6">
+          {[
+            "Certified vaccines",
+            "Cold-chain assured",
+            "Licensed professionals",
+            "Featured by Univ. of Utah Lassonde Institute",
+          ].map((label) => (
+            <span key={label} className="flex items-center gap-2 text-xs font-medium text-white/50">
+              <ShieldCheck className="size-3.5 text-brand-400" /> {label}
+            </span>
+          ))}
+        </Container>
+      </div>
 
       <div className="border-t border-white/10">
         <Container className="flex flex-col items-center justify-between gap-2 py-5 text-xs sm:flex-row">

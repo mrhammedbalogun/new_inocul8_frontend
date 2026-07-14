@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Breadcrumbs } from "@/components/service/breadcrumbs";
 import { ServiceProse } from "@/components/service/service-prose";
-import { StatsBar } from "@/components/sections/stats-bar";
+import { TrustBar } from "@/components/sections/trust-bar";
 import { WhyUs } from "@/components/sections/why-us";
 import { CtaBanner } from "@/components/sections/cta-banner";
 import { MobileBookBar } from "@/components/mobile-book-bar";
@@ -44,7 +44,7 @@ export default async function AboutPage() {
         </Container>
       </section>
 
-      <StatsBar />
+      <TrustBar />
 
       <section className="py-16 sm:py-20">
         <Container className="max-w-3xl">
