@@ -38,7 +38,7 @@ export function Services({
                 <h3 className="relative mt-6 max-w-md font-display text-2xl font-semibold text-white">
                   {featured.title}
                 </h3>
-                <p className="relative mt-3 max-w-lg flex-1 text-sm leading-relaxed text-white/80">
+                <p className="relative mt-3 max-w-lg flex-1 text-sm leading-relaxed text-white/90">
                   {featured.body}
                 </p>
                 <span className="relative mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-white">
@@ -50,7 +50,7 @@ export function Services({
           )}
 
           {rest.map((card, i) => (
-            <Reveal key={card.title} delay={(i + 1) * 0.06} className="h-full">
+            <Reveal key={card.href} delay={(i + 1) * 0.06} className="h-full">
               <Link
                 href={card.href}
                 className="group flex h-full flex-col rounded-2xl border border-ink-900/8 bg-white p-7 shadow-soft transition-all hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift"
