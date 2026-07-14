@@ -3,7 +3,9 @@
 // Scroll-reveal wrapper: fades/slides children in the first time they enter
 // the viewport. Server components stay server-rendered — only this thin
 // wrapper is a client island. Respects prefers-reduced-motion.
-import { LazyMotion, domAnimation, m, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
+
+import { MotionLazy } from "./lazy";
 
 export function Reveal({
   children,
@@ -18,7 +20,7 @@ export function Reveal({
 }) {
   const reduce = useReducedMotion();
   return (
-    <LazyMotion features={domAnimation} strict>
+    <MotionLazy>
       <m.div
         className={className}
         initial={reduce ? false : { opacity: 0, y }}
@@ -28,6 +30,6 @@ export function Reveal({
       >
         {children}
       </m.div>
-    </LazyMotion>
+    </MotionLazy>
   );
 }
