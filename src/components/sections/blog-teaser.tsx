@@ -33,7 +33,8 @@ export function BlogTeaser({
 
         <div className="mt-12 grid gap-6 md:grid-cols-2">
           {teasers.map((post, i) => {
-            const featured = i === 0;
+            // Featured spread needs two side cards to fill column 2.
+            const featured = i === 0 && teasers.length >= 3;
             return (
               <Reveal key={post.href} delay={i * 0.08} className={featured ? "h-full md:row-span-2" : "h-full"}>
                 <Link
