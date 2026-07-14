@@ -68,7 +68,7 @@ Storytelling arc: hook → proof → problem → solution → process → differ
 - CMS `cta_title`/`cta_description` on a brand gradient panel with organic shapes; Book + WhatsApp + phone. Rounded container floating over the footer edge.
 
 ### 12. Footer (upgrade)
-- Large organized footer on `ink-950`: brand + mission column, Services links (what-we-do tree), Quick links, Contact (address, phone, WhatsApp, email, hours), newsletter signup form (posts to existing contact API route or mailto-fallback — implementation plan decides; no fake success states), social icons, certifications row, legal (privacy/terms) + copyright. Keep all current footer links so no internal-link SEO regressions.
+- Large organized footer on `ink-950`: brand + mission column, Services links (what-we-do tree), Quick links, Contact (address, phone, WhatsApp, email, hours), newsletter signup form (posts to the existing `/api/contact` route with a `subject: "Newsletter signup"` payload so it reuses the Mailgun delivery + spam protection already in place; real success/error states, no fake confirmations), social icons, certifications row, legal (privacy/terms) + copyright. Keep all current footer links so no internal-link SEO regressions.
 
 Mobile sticky `MobileBookBar` stays, restyled to match.
 
