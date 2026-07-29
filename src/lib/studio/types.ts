@@ -27,10 +27,28 @@ export type StudioPostRow = {
 // NOTE: the detail endpoint (`GET /studio/posts/:id/`) does NOT return
 // `author_name` — only the list endpoint does. Detail exposes the raw
 // `author` foreign key id instead, so StudioPostDetail intentionally omits
-// author_name rather than inheriting it from StudioPostRow. `author` is also
-// read-only through normal create/update calls: it's workflow-locked to the
-// editor-only `flags` action, so never send it in a POST/PATCH body.
-export type StudioPostDetail = Omit<StudioPostRow, "author_name"> & {
+// author_name rather than inheriting it from StudioPostRow.
+//
+// The fields marked `readonly` below are all rejected by the backend on a
+// plain create/update call, for one of two reasons — kept distinct in the
+// comments so nobody "fixes" this by dropping the modifiers:
+//   - workflow-locked: writable in principle, but only through a dedicated
+//     action/permission, not a raw PATCH. `author`, `is_featured`,
+//     `noindex`, and `canonical_url` go through the editor-only `flags`
+//     action (byline is an authority claim a writer must not be able to
+//     put a clinician's name on); `status` and `review_note` go through the
+//     review/publish actions.
+//   - system-computed: the server derives these; there is no action that
+//     accepts them as input at all.
+// A later task typing a PATCH body as `Partial<StudioPostDetail>` should
+// get a compiler error for touching any of these, not a 400 at runtime.
+export type StudioPostDetail = Omit<
+  StudioPostRow,
+  "author_name" | "status" | "published_at" | "is_featured"
+> & {
+  readonly status: PostStatus; // workflow-locked: review/publish actions
+  readonly published_at: string | null; // system-computed: set by the publish action
+  readonly is_featured: boolean; // workflow-locked: editor-only flags action
   excerpt: string;
   body: string;
   draft_title: string;
@@ -44,22 +62,21 @@ export type StudioPostDetail = Omit<StudioPostRow, "author_name"> & {
   draft_og_description: string;
   categories: StudioCategoryT[];
   tags: string[];
-  /** Read-only author id; see note above — do not write this field. */
-  author: number | null;
+  readonly author: number | null; // workflow-locked: editor-only flags action
   reading_minutes: number;
-  first_published_at: string | null;
-  medically_reviewed_by: StudioAuthorT | null;
-  medically_reviewed_at: string | null;
-  legacy_team_reviewed: boolean;
-  review_note: string;
+  readonly first_published_at: string | null; // system-computed: set once by the publish action
+  readonly medically_reviewed_by: StudioAuthorT | null; // system-computed: set by the medical-review action
+  readonly medically_reviewed_at: string | null; // system-computed
+  readonly legacy_team_reviewed: boolean; // system-computed: migration-era flag
+  readonly review_note: string; // workflow-locked: set through the review action
   has_pending_changes: boolean;
   meta_title: string;
   meta_description: string;
   focus_keyword: string;
-  canonical_url: string;
+  readonly canonical_url: string; // workflow-locked: editor-only flags action
   og_title: string;
   og_description: string;
-  noindex: boolean;
+  readonly noindex: boolean; // workflow-locked: editor-only flags action
 };
 
 export type StudioMe = {

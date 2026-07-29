@@ -19,10 +19,15 @@ export function PostsTable() {
   useEffect(() => {
     let cancelled = false;
 
+    // The API caps page_size server-side (observed: 24/page regardless of
+    // the requested page_size=100), so a single fetch silently truncates
+    // the list. Follow `next` until exhausted rather than trusting one page.
+    // Hard-capped so a backend pagination bug (perpetually truthy `next`)
+    // can't spin this loop forever in a staff member's browser — if it
+    // trips, that's surfaced as a load error, not a silently partial list.
+    const MAX_PAGES = 50;
+
     async function loadAll() {
-      // The API caps page_size server-side (observed: 24/page regardless of
-      // the requested page_size=100), so a single fetch silently truncates
-      // the list. Follow `next` until exhausted rather than trusting one page.
       const all: StudioPostRow[] = [];
       let page = 1;
       for (;;) {
@@ -32,6 +37,9 @@ export function PostsTable() {
         all.push(...data.results);
         if (!data.next || data.results.length === 0) break;
         page += 1;
+        if (page > MAX_PAGES) {
+          throw new Error(`Post list exceeded ${MAX_PAGES} pages — stopped to avoid an unbounded fetch loop.`);
+        }
       }
       return all;
     }
