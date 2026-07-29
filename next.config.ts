@@ -18,12 +18,27 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self' https://wa.me",
   "frame-ancestors 'none'",
-  "upgrade-insecure-requests",
+  // Dev-only exclusion: this directive tells the browser to silently rewrite
+  // every same-origin http:// subresource request the page makes (including
+  // the studio's own `fetch("/api/studio/...")` calls) to https://. The dev
+  // server has no TLS listener, so in dev that turned every studio API call
+  // into a failed https request to a closed port — discovered while
+  // verifying this task's login+list flow end to end.
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
-  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  // Dev-only: never send HSTS over plain HTTP. Chrome pins it per-host once
+  // seen, so a dev server on http://localhost that sent this would get the
+  // browser to force https for localhost on every future visit — including
+  // to other local projects — until manually cleared via
+  // chrome://net-internals/#hsts. Discovered while verifying this task: the
+  // studio's own API call broke because the *previous* response (the page
+  // load) had already taught Chrome to upgrade localhost to https.
+  ...(isDev
+    ? []
+    : [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]),
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
