@@ -7,7 +7,6 @@
 // nodes inside the editor component instead of importing React here.
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
-import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import { Node, mergeAttributes } from "@tiptap/core";
 import { generateHTML, generateJSON } from "@tiptap/html";
 
@@ -87,13 +86,13 @@ export const Callout = Node.create({
 export const EDITOR_EXTENSIONS = [
   StarterKit.configure({
     heading: { levels: [2, 3, 4] }, // no h1 — the page template owns the sole h1
-    link: { openOnClick: false, HTMLAttributes: { rel: "noopener" } },
+    // target: null suppresses Link's default target="_blank" — the legacy corpus has no
+    // target attributes and the backend nh3 allowlist is "a": {"href", "title", "rel"} (no
+    // target), so emitting one would be a real behaviour change the sanitizer then disagrees
+    // with on every link in the corpus.
+    link: { openOnClick: false, HTMLAttributes: { rel: "noopener", target: null } },
   }),
   Image,
-  Table.configure({ resizable: false }),
-  TableRow,
-  TableHeader,
-  TableCell,
   Figure,
   Callout,
 ];
