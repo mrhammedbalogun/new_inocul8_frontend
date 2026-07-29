@@ -16,9 +16,15 @@ async function forward(req: NextRequest, path: string[], token: string) {
   const url = `${API}/studio/${path.join("/")}/${req.nextUrl.search}`;
   const headers = new Headers();
   headers.set("Authorization", `Bearer ${token}`);
+  // The body below is forwarded as the exact raw bytes already received (see arrayBuffer()
+  // below), not reconstructed as a new FormData — so for multipart requests those bytes are
+  // already encoded against the boundary the *original* client fetch chose, and that boundary
+  // only appears in its Content-Type header. Skipping this header for multipart (as a previous
+  // version of this function did, on the theory that "fetch sets its own boundary") strips the
+  // only place that boundary is recorded, so Django receives a bodiless-looking multipart
+  // request with an empty Content-Type and rejects it with 415. Always forward it verbatim.
   const contentType = req.headers.get("content-type");
-  // Let fetch set its own boundary for multipart uploads.
-  if (contentType && !contentType.startsWith("multipart/form-data")) {
+  if (contentType) {
     headers.set("Content-Type", contentType);
   }
   const body = req.method === "GET" || req.method === "HEAD" ? undefined : await req.arrayBuffer();
