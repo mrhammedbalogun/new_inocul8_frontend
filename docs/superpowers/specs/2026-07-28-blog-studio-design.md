@@ -191,10 +191,28 @@ invariant becomes "sanitized by nh3 at write time".
 
 **Allowlist:** `h2`–`h4` (`h1` stripped — the page template owns the sole h1, and
 duplicate h1s are an SEO own-goal), `p`, `ul`/`ol`/`li`, `blockquote`, `strong`/`em`/`u`/`s`,
-`a` (scheme-limited to http/https/mailto, forced `rel="noopener"`), `img`
+`a` (scheme-limited to http/https/mailto; `rel` permitted), `img`
 (`src` limited to our own hosts, plus `alt`/`width`/`height`/`loading`), `figure`/`figcaption`,
-`table`/`thead`/`tbody`/`tr`/`th`/`td`, `hr`, `pre`/`code`, `br`, and `div`/`span`
-restricted to an explicit class allowlist (`callout*`, `align-*`, `size-*`).
+`hr`, `pre`/`code`, `br`, and `div`/`span` restricted to an explicit class allowlist
+(`callout*`, `align-*`, `size-*`).
+
+**No `target` attribute, on either side.** Tiptap's Link extension injects
+`target="_blank"` by default; the schema overrides it to `null`. The live corpus has no
+`target` attributes today, so emitting one would change the behaviour of 70 ranked pages
+the moment anyone re-saves them. Editor and sanitizer agree by both omitting it. (New-tab
+external links, if ever wanted, are a render-time decision — never baked into stored HTML.)
+
+**Tables are deliberately absent.** The measured legacy corpus contains **zero** tables and
+the client brief never asked for them, while `@tiptap/extension-table` emits `style` and
+`colgroup` that the allowlist strips — meaning an author could set a column width and watch
+it silently vanish. Table support is therefore cut from both the schema and the allowlist; an
+allowlist entry nothing legitimate can produce is just standing attack surface. *Re-add path:*
+allowlist `table/thead/tbody/tr/th/td/colgroup/col` without `style`, accept that authored
+column widths do not persist, and let `.service-prose table` own all presentation.
+
+**Scope warning:** this allowlist is for **blog** content only. Service pages *do* contain
+real table markup, so the sanitizer must never be wired into `Service.save()` without first
+restoring the table tags — the function is named for blog use to make that misuse obvious.
 
 **Stripped unconditionally:** all `style` attributes, all `on*` handlers, all `data-*`
 not explicitly allowlisted, and **all `<iframe>`s — permanently**. YouTube, if ever
@@ -451,9 +469,9 @@ first test suite.
 **Editor — TipTap v3**, HTML in / HTML out:
 
 H2–H4, bold / italic / underline / strikethrough, bullet and numbered lists, link,
-blockquote, horizontal rule, table, code block, one callout node, and inline images with
+blockquote, horizontal rule, code block, one callout node, and inline images with
 alignment (left / centre / right / full), size preset (small / medium / large / original),
-caption and alt. Block drag handles for reordering; drag-and-drop and paste-to-upload.
+caption and alt. **No tables** — see §5. Block drag handles for reordering; drag-and-drop and paste-to-upload.
 
 Licensing verified: Tiptap open-sourced ten formerly-Pro extensions under MIT in 2025,
 including **Drag Handle** and **File Handler** — the two this design depends on. The paid

@@ -50,9 +50,10 @@ StarterKit v3 already bundles bold, italic, strike, **underline**, code, code-bl
 
 ```bash
 npm install @tiptap/core@3.29.2 @tiptap/pm@3.29.2 @tiptap/starter-kit@3.29.2 \
-  @tiptap/extensions@3.29.2 @tiptap/extension-image@3.29.2 @tiptap/extension-table@3.29.2 \
-  @tiptap/html@3.29.2
+  @tiptap/extensions@3.29.2 @tiptap/extension-image@3.29.2 @tiptap/html@3.29.2
 ```
+
+**No table extension.** Tables are cut from v1: the measured corpus has zero, the brief never asked for them, and the extension emits `style`/`colgroup` the sanitizer strips.
 
 - [ ] **Step 2: Write the shared schema module**
 
@@ -64,7 +65,6 @@ npm install @tiptap/core@3.29.2 @tiptap/pm@3.29.2 @tiptap/starter-kit@3.29.2 \
 // editor emits is always exactly the HTML we verify and sanitize against.
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
-import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import { Node, mergeAttributes } from "@tiptap/core";
 import { generateHTML, generateJSON } from "@tiptap/html";
 
@@ -144,13 +144,9 @@ export const Callout = Node.create({
 export const EDITOR_EXTENSIONS = [
   StarterKit.configure({
     heading: { levels: [2, 3, 4] }, // no h1 — the page template owns the sole h1
-    link: { openOnClick: false, HTMLAttributes: { rel: "noopener" } },
+    link: { openOnClick: false, HTMLAttributes: { rel: "noopener", target: null } },
   }),
   Image,
-  Table.configure({ resizable: false }),
-  TableRow,
-  TableHeader,
-  TableCell,
   Figure,
   Callout,
 ];
@@ -210,7 +206,7 @@ Expected: `checked 70, changed 0`.
 
 - [ ] **Step 5: Capture the emitted-HTML sample for the sanitizer**
 
-Append to `docs/tiptap-roundtrip-report.md` a section titled `## Emitted markup samples` containing the serialized output of a document exercising **every** node: h2/h3/h4, bold/italic/underline/strike, bullet + ordered list, link, blockquote, hr, code block, table, `Figure` (all four aligns, all four sizes), `Callout` (all three variants). Generate it by constructing the HTML by hand, passing it through `htmlRoundTrip`, and pasting the result.
+Append to `docs/tiptap-roundtrip-report.md` a section titled `## Emitted markup samples` containing the serialized output of a document exercising **every** node: h2/h3/h4, bold/italic/underline/strike, bullet + ordered list, link, blockquote, hr, code block, `Figure` (all four aligns, all four sizes), `Callout` (all three variants). Generate it by constructing the HTML by hand, passing it through `htmlRoundTrip`, and pasting the result.
 
 **Task 5 of this plan builds the nh3 allowlist directly from this sample.** Without it the allowlist is guesswork.
 
@@ -934,7 +930,7 @@ git commit -m "feat: blog post workflow fields, status enum and live() queryset"
 - Modify: `apps/blog/models.py`
 
 **Interfaces:**
-- Produces: `apps.content.sanitize.clean_html(html: str) -> str`.
+- Produces: `apps.content.sanitize.clean_blog_html(html: str) -> str`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -949,19 +945,19 @@ from apps.content.sanitize import clean_html
 
 class SanitizerTests(TestCase):
     def test_strips_script_and_event_handlers(self):
-        out = clean_html('<p onclick="steal()">Hi</p><script>evil()</script>')
+        out = clean_blog_html('<p onclick="steal()">Hi</p><script>evil()</script>')
         self.assertNotIn("script", out)
         self.assertNotIn("onclick", out)
         self.assertIn("Hi", out)
 
     def test_strips_iframes_entirely(self):
-        self.assertNotIn("iframe", clean_html('<iframe src="https://evil.test"></iframe>'))
+        self.assertNotIn("iframe", clean_blog_html('<iframe src="https://evil.test"></iframe>'))
 
     def test_strips_style_attributes(self):
-        self.assertNotIn("style", clean_html('<p style="color:red">Hi</p>'))
+        self.assertNotIn("style", clean_blog_html('<p style="color:red">Hi</p>'))
 
     def test_demotes_h1_but_keeps_its_text(self):
-        out = clean_html("<h1>Title</h1>")
+        out = clean_blog_html("<h1>Title</h1>")
         self.assertNotIn("<h1", out)
         self.assertIn("Title", out)
 
@@ -972,25 +968,22 @@ class SanitizerTests(TestCase):
             "<figcaption>Caption</figcaption></figure>"
             '<div class="callout callout-info"><p>Note</p></div>'
         )
-        out = clean_html(html)
+        out = clean_blog_html(html)
         self.assertIn("align-left size-medium", out)
         self.assertIn("callout callout-info", out)
         self.assertIn('alt="Nurse"', out)
         self.assertIn('width="800"', out)
 
     def test_drops_unknown_classes_but_keeps_allowlisted_ones(self):
-        out = clean_html('<div class="callout callout-info evil-class"><p>x</p></div>')
+        out = clean_blog_html('<div class="callout callout-info evil-class"><p>x</p></div>')
         self.assertIn("callout-info", out)
         self.assertNotIn("evil-class", out)
 
     def test_rejects_offsite_image_sources(self):
-        self.assertNotIn("evil.test", clean_html('<img src="https://evil.test/x.jpg" alt="x">'))
-
-    def test_forces_noopener_on_links(self):
-        self.assertIn("noopener", clean_html('<a href="https://example.com">x</a>'))
+        self.assertNotIn("evil.test", clean_blog_html('<img src="https://evil.test/x.jpg" alt="x">'))
 
     def test_strips_javascript_urls(self):
-        self.assertNotIn("javascript", clean_html('<a href="javascript:alert(1)">x</a>').lower())
+        self.assertNotIn("javascript", clean_blog_html('<a href="javascript:alert(1)">x</a>').lower())
 
 
 class ModelLayerEnforcementTests(TestCase):
@@ -1023,7 +1016,12 @@ Expected: FAIL — `ModuleNotFoundError: No module named 'apps.content.sanitize'
 `apps/content/sanitize.py`:
 
 ```python
-"""One sanitization gate for all rich text, enforced at the model layer.
+"""Sanitization gate for BLOG rich text, enforced at the model layer.
+
+SCOPE WARNING: this allowlist has no table tags, because blog content has none.
+Service pages DO contain real table markup — never wire clean_blog_html into
+Service.save() without restoring table/thead/tbody/tr/th/td first, or it will
+silently destroy live service-page content.
 
 Sanitize once on write, store clean, render fast. Deliberately NOT sanitizing on
 the Next render path: a sanitizer upgrade would otherwise silently alter the
@@ -1038,9 +1036,17 @@ ALLOWED_TAGS = {
     "ul", "ol", "li", "blockquote",
     "h2", "h3", "h4", "hr", "pre", "code",
     "figure", "figcaption", "img",
-    "table", "thead", "tbody", "tr", "th", "td",
     "div", "span",
 }
+# No table tags: the measured legacy corpus has zero tables, the brief never asked
+# for them, and the Tiptap table extension emits style/colgroup this allowlist would
+# strip — so an author would set a column width and watch it vanish. Tables are cut
+# from the editor schema too. An allowlist entry nothing can legitimately produce is
+# just standing attack surface.
+#
+# No "target": Tiptap's Link extension injects target="_blank" by default and the
+# schema overrides it to null. The live corpus has no target attributes, so emitting
+# one would change the behaviour of 70 ranked pages on their first re-save.
 
 ALLOWED_ATTRIBUTES = {
     "a": {"href", "title", "rel"},
@@ -1048,8 +1054,6 @@ ALLOWED_ATTRIBUTES = {
     "figure": {"class"},
     "div": {"class"},
     "span": {"class"},
-    "th": {"colspan", "rowspan", "scope"},
-    "td": {"colspan", "rowspan"},
 }
 
 ALLOWED_URL_SCHEMES = {"http", "https", "mailto"}
@@ -1067,8 +1071,8 @@ def _attribute_filter(tag: str, attr: str, value: str):
     return value
 
 
-def clean_html(html: str) -> str:
-    """Sanitize untrusted rich text against the blog allowlist."""
+def clean_blog_html(html: str) -> str:
+    """Sanitize untrusted blog rich text. See the module docstring scope warning."""
     if not html:
         return ""
     return nh3.clean(
@@ -1076,7 +1080,6 @@ def clean_html(html: str) -> str:
         tags=ALLOWED_TAGS,
         attributes=ALLOWED_ATTRIBUTES,
         url_schemes=ALLOWED_URL_SCHEMES,
-        link_rel="noopener",
         attribute_filter=_attribute_filter,
         strip_comments=True,
     )
@@ -1116,7 +1119,7 @@ class Command(BaseCommand):
         for post in BlogPost.objects.all().order_by("slug"):
             for field in ("body", "excerpt"):
                 before = getattr(post, field) or ""
-                after = clean_html(before)
+                after = clean_blog_html(before)
                 if before.strip() == after.strip():
                     continue
                 changed += 1
@@ -1149,9 +1152,9 @@ If anything would change, read each diff. Whitespace-only differences are approv
 In `apps/blog/models.py`, inside `BlogPost.save()`, before the `super().save()` call:
 
 ```python
-        self.body = clean_html(self.body)
-        self.draft_body = clean_html(self.draft_body)
-        self.excerpt = clean_html(self.excerpt)
+        self.body = clean_blog_html(self.body)
+        self.draft_body = clean_blog_html(self.draft_body)
+        self.excerpt = clean_blog_html(self.excerpt)
 ```
 
 Add `from apps.content.sanitize import clean_html` at the top.

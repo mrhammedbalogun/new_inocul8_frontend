@@ -643,7 +643,7 @@ git commit -m "feat: studio post list"
 npm install @tiptap/react@3.29.2 @tiptap/extension-drag-handle-react@3.29.2 @tiptap/extension-file-handler@3.29.2
 ```
 
-(`@tiptap/core`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extensions`, `@tiptap/extension-image`, `@tiptap/extension-table` and `@tiptap/html` were installed in Plan 1 Task 0.)
+(`@tiptap/core`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extensions`, `@tiptap/extension-image` and `@tiptap/html` were installed in Plan 1 Task 0. **No table extension** — tables are cut from v1, see the spec §5.)
 
 - [ ] **Step 2: Build the toolbar**
 
@@ -655,7 +655,7 @@ npm install @tiptap/react@3.29.2 @tiptap/extension-drag-handle-react@3.29.2 @tip
 import type { Editor } from "@tiptap/react";
 import {
   Bold, Italic, Underline, Strikethrough, List, ListOrdered, Quote,
-  Minus, Link2, Image as ImageIcon, Table as TableIcon, Info, Code,
+  Minus, Link2, Image as ImageIcon, Info, Code,
 } from "lucide-react";
 
 type Props = { editor: Editor | null; onInsertImage: () => void };
@@ -716,9 +716,6 @@ export function Toolbar({ editor, onInsertImage }: Props) {
       <button type="button" title="Insert image" onClick={onInsertImage} className={btn(false)}>
         <ImageIcon className="size-4" />
       </button>
-      <button type="button" title="Table"
-              onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-              className={btn(editor.isActive("table"))}><TableIcon className="size-4" /></button>
       <button type="button" title="Callout"
               onClick={() => editor.chain().focus().toggleWrap("callout", { variant: "info" }).run()}
               className={btn(editor.isActive("callout"))}><Info className="size-4" /></button>
@@ -1587,6 +1584,14 @@ In `src/app/globals.css`, inside the same layer as `.service-prose`:
   }
   .service-prose ol > li::before {
     content: none;
+  }
+
+  /* Tiptap wraps list-item content in <p> (stock ProseMirror ListItem schema).
+     This pins the invariant that it renders identically to bare li text — today
+     that holds only because no .service-prose p margin rule exists, which is an
+     accident a future styling pass would silently break. */
+  .service-prose li > p {
+    margin: 0;
   }
 
   .service-prose figure {
