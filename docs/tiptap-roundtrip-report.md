@@ -1,23 +1,50 @@
 # Tiptap round-trip report
 
-Posts checked: **70** · Changed: **68**
+Posts checked: **70** · DOM-changed: **68** · Text-loss: **0** · Link-loss: **0**
 
-> **Revision note (post-review fix):** an earlier revision of this report flagged a category
-> "`target="_blank" rel="noopener"` added to every `<a>`" as an *approved cosmetic difference*.
-> On review that was wrong — the live corpus has **no** `target` attribute today, so emitting one
-> is a real behaviour change to 70 ranked pages, and it directly disagreed with the backend nh3
-> allowlist (`"a": {"href", "title", "rel"}` — no `target`). Fixed by setting
-> `link: { HTMLAttributes: { rel: "noopener", target: null } }` in `EDITOR_EXTENSIONS`
-> (`src/lib/editor/schema.ts`). Verified: `target=` no longer appears anywhere in this report's
-> output. That category is removed below rather than left as a stale claim.
+## Text-loss failures
+
+None — zero posts lost text content.
+
+## Link-loss failures
+
+None — zero posts lost a link.
 
 ## Analysis of changes (approved)
 
-Raw byte/DOM diff flags 68/70 posts as "changed." Every one of those diffs was inspected by
-diffing plain text content and the set of `href`s before/after (with HTML entities decoded),
-independent of markup shape. That check found **zero lost text content** and **zero lost
-links** (see below — the one previously-lost link has been fixed at the data level). All
-remaining differences are one of four well-understood, non-lossy transformations that
+`text-loss` and `link-loss` above are no longer ad-hoc analysis — they're committed,
+re-runnable assertions in `scripts/tiptap-roundtrip.mjs` (`npm run` it, or
+`node --experimental-strip-types scripts/tiptap-roundtrip.mjs`), and the script **exits
+non-zero if either is greater than zero**. `dom-changed` alone does not fail the script; only
+real text or link loss does. This is the safety net the 68/70 `dom-changed` rate is accepted
+against: it's not a claim anyone has to take on faith or re-derive by hand, it re-verifies
+itself every run, including automatically if `EDITOR_EXTENSIONS` changes later.
+
+**Revision note — `target="_blank"` removed:** an earlier revision of this report flagged
+`target="_blank" rel="noopener"` on every `<a>` as an *approved cosmetic difference*. That was
+wrong — the live corpus has **no** `target` attribute today, so emitting one is a real behaviour
+change to 70 ranked pages, and it directly disagreed with the backend nh3 allowlist
+(`"a": {"href", "title", "rel"}` — no `target`). Fixed by setting
+`link: { HTMLAttributes: { rel: "noopener", target: null } }` in `EDITOR_EXTENSIONS`
+(`src/lib/editor/schema.ts`). Verified: `target=` does not appear anywhere in this report.
+
+**A note on the text-loss check's own correctness:** the first version of this check flagged 2
+false positives (`hpv-vaccine-dose-schedule-modified-part-2`,
+`hepatitis-b-cost-to-treat-in-nigeria`) because it stripped every HTML tag — including inline
+ones — to a single space. Two adjacent `<a>` tags with the same `href` and no whitespace between
+them (e.g. `<a href="X">guidance</a><a href="X">. </a>`) render with no gap, but the naive
+stripper inserted one anyway; when Tiptap correctly merges those adjacent identical-mark spans
+into a single tag, the spurious space vanished and looked like lost text. Fixed by only treating
+block-level tags (`p`, headings, `li`, `ul`/`ol`, `blockquote`, `div`, `figure`/`figcaption`,
+`pre`, `hr`, `br`) as real content breaks; inline tags are stripped with no inserted space. This
+was regression-tested against both a synthetic dropped-paragraph case (correctly still flagged as
+loss) and a synthetic no-whitespace inline-boundary case (correctly not flagged) before being
+committed — see the "Post-review fix report (round 2)" in the task report for the full
+before/after.
+
+Every one of the 68 `dom-changed` posts was inspected the same way: diffing plain text content
+and the set of `href`s before/after (with HTML entities decoded), independent of markup shape.
+All differences decompose into four well-understood, non-lossy transformations that
 Tiptap/ProseMirror applies on every parse. They are approved — no further `EDITOR_EXTENSIONS`
 change is needed for them.
 
@@ -53,7 +80,8 @@ Link extension validates the URI protocol on parse and correctly declined to pre
 (the anchor **text** survived; only the link itself was dropped). Rather than loosen URL
 validation in the schema to accept it, the fix was applied to the data:
 `src/lib/data/blog-posts.json` now has `href="https://vaccines.inocul8.com.ng/paxlovid/"` for
-that post. Re-verified after the fix: **zero posts now lose a link.**
+that post. The committed `link-loss` check now enforces **zero** posts may lose a link, not just
+reports it as a one-time finding.
 
 **Table support has been removed entirely.** `Table`/`TableRow`/`TableHeader`/`TableCell` and
 the `@tiptap/extension-table` dependency were dropped from `EDITOR_EXTENSIONS`. The measured
@@ -64,10 +92,9 @@ either accept (attack surface) or strip (silently discarding an author's chosen 
 it was a papercut with no upside. If tables are needed later, re-add the extension as its own
 task with its own allowlist entries and a real corpus need behind it.
 
-No other post lost a link, a heading, a list item, or any text. `checked 70, changed 68` is the
-expected, approved result for this corpus — see the category breakdown above.
-
-## Per-post diffs
+No other post lost a link, a heading, a list item, or any text. `checked 70, dom-changed 68,
+text-loss 0, link-loss 0` is the expected, approved, **enforced** result for this corpus — see
+the category breakdown above.
 
 ## hpv-vaccine-myths-nigeria
 
@@ -1275,8 +1302,9 @@ search over the whole rendered string).
 - `loading="lazy"` on `img` is emitted unconditionally by the `Figure` node's `renderHTML` — not
   author-controlled, safe to allow unconditionally.
 - `rel="noopener"` on `a` is emitted unconditionally for every link — allow it alongside `href`.
-  `target` is deliberately **not** emitted (see the revision note at the top of this report) and
-  should not need to be in the allowlist for content this schema produces.
+  `target` is deliberately **not** emitted (`HTMLAttributes: { target: null }` in
+  `src/lib/editor/schema.ts` — see "Analysis of changes" above) and should not need to be in the
+  allowlist for content this schema produces.
 - Table-related tags/attributes (`table`, `tr`, `td`, `th`, `colgroup`, `col`, `style` on any of
   them, `colspan`/`rowspan`) are **not** produced by this schema and should not be allowlisted —
   see the removal note above.
