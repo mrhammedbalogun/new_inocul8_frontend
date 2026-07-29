@@ -1730,7 +1730,33 @@ git commit -m "feat: studio post API with autosave, slug lock and review freeze"
 
 ---
 
-## Task 8: Workflow actions and the medical-review stamp
+## Task 8: Workflow actions, shadow columns, and the medical-review stamp
+
+> **AMENDED 2026-07-28 — this task is larger than originally written.** Review of Task 7
+> proved the draft/live split covered `body` only, so autosave wrote `title`, `excerpt` and
+> the SEO fields straight to the live row of a published post. See spec §6.1 (amended) for
+> the ruling. This task now also implements the uniform shadow-column model.
+>
+> **Additional model fields (+ migration):** `draft_title`, `draft_excerpt`, `draft_tags`
+> (JSON), `draft_meta_title`, `draft_meta_description`, `draft_focus_keyword`. Backfill each
+> from its live counterpart, exactly as `draft_body` was.
+>
+> **Autosave's allowed set becomes `draft_*` only** — `draft_body`, `draft_title`,
+> `draft_excerpt`, `draft_tags`, `draft_meta_title`, `draft_meta_description`,
+> `draft_focus_keyword`. No live field is writable by autosave, ever.
+>
+> **Define the pairs once** as a module-level constant (e.g. `DRAFT_FIELD_PAIRS`) that the
+> autosave allow-list, `promote_draft_to_live()` and the discard action all iterate. Three
+> hand-maintained lists is how these drift apart.
+>
+> **Workflow-lock these in the studio serializer** (add to `PROTECTED_FIELDS`): `noindex`,
+> `canonical_url`, `is_featured` — each flips a ranked page's indexability or the homepage,
+> so they belong to an editor action gated on `publish_blogpost`, not to plain CRUD.
+>
+> **`categories` is a documented carve-out:** no shadow M2M. Exclude it from autosave; it
+> commits only via the explicit Update/Publish action.
+>
+> **Discard** copies live → draft for **all** pairs, not just the body.
 
 **Files:**
 - Create: `apps/blog/studio/workflow.py`

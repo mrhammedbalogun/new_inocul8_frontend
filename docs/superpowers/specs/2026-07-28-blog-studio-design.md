@@ -228,8 +228,41 @@ stored bodies offline and diffed. Zero unintended changes, or it does not ship.
 
 ### 6.1 The autosave invariant
 
-> **`body` is always exactly what is live.** Autosave only ever writes `draft_body`.
-> Only an explicit Publish/Update copies `draft_body → body` and fires the revalidate webhook.
+> **Every field the public renders has a `draft_` twin. Autosave writes only `draft_*`
+> columns. Only an explicit Publish/Update promotes all pairs atomically and fires the
+> revalidate webhook.**
+
+**Amended 2026-07-28.** The original wording covered `body` alone, and implementation proved
+that was a hole, not a simplification: autosave also wrote `title`, `excerpt` and the SEO
+fields straight to the live row, so a half-rewritten headline on a ranked page was one
+keystroke away. The covenant's strength is uniformity — one rule for every field, rather
+than a rule for `body` and an assumption about everything else.
+
+**Every field is exactly one of three kinds.** A field that is publicly visible and reachable
+through plain CRUD is a bug of this class:
+
+| Kind | Fields | Rule |
+|---|---|---|
+| **Shadowed** | `title`, `excerpt`, `tags`, `meta_title`, `meta_description`, `focus_keyword` (+ `og_title`, `og_description` once added) | `draft_*` twin; autosave writes only the twin; publish promotes the pair |
+| **Workflow-locked** | `status`, `published_at`, `slug`, `noindex`, `canonical_url`, `is_featured` | Read-only in the serializer; writable only by a named action gated on `publish_blogpost` |
+| **System-computed** | `medically_reviewed_by`, `medically_reviewed_at`, `approved_by`, `first_published_at`, `legacy_team_reviewed`, `reading_minutes` | No client write path at all |
+
+One deliberate carve-out, recorded as a decision rather than an oversight: **`categories` (M2M)
+gets no shadow table** — a draft M2M is real schema cost for a rare, deliberate edit. Categories
+are excluded from autosave entirely and commit only via the explicit Update/Publish action, so
+no implicit write to a live post can occur through them.
+
+Two derived-property traps this rule exists to catch, both found in review:
+- **Liveness is `status AND published_at`.** Locking `status` alone left `published_at`
+  writable, letting any author de-index a ranked page by dating it into the future.
+- **Indexability is `noindex` and `canonical_url`.** Either one flips a ranked page out of
+  the index as effectively as unpublishing.
+
+The **promote action is the single choke point** that fires revalidation, so "public content
+changed" and "revalidation fired" can never disagree.
+
+A published post being edited shows **"Published — you have unsaved-to-live edits"** with
+*Update live post* and *Discard my edits* (which copies live → draft for **all** pairs).
 
 This holds in every status, forever, which is what makes the SEO promise checkable.
 A published post being edited shows **"Published — you have unsaved-to-live edits"** with
