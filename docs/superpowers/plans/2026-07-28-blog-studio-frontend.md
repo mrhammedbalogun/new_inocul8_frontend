@@ -47,12 +47,13 @@
 In `src/proxy.ts`, add above the existing handler:
 
 ```ts
-const STUDIO_REFRESH_COOKIE = "i8_studio_refresh";
+const STUDIO_SESSION_MARKER = "i8_studio_session";
 
-/** Cheap presence check. This is UX only — the real boundary is Django
- *  rejecting the JWT on every proxied call. */
+/** Cheap presence check against a valueless marker cookie — the proxy never
+ *  sees a token. This is UX only; the real boundary is Django rejecting the
+ *  JWT on every proxied call. */
 function hasStudioSession(req: NextRequest) {
-  return Boolean(req.cookies.get(STUDIO_REFRESH_COOKIE)?.value);
+  return Boolean(req.cookies.get(STUDIO_SESSION_MARKER)?.value);
 }
 ```
 
@@ -163,6 +164,12 @@ const API = process.env.API_URL ?? "https://api.inocul8.com.ng/api/v1";
 
 export const ACCESS_COOKIE = "i8_studio_access";
 export const REFRESH_COOKIE = "i8_studio_refresh";
+/** Valueless presence marker so proxy.ts can tell "signed in" without ever
+ *  seeing a token. It MUST have a different NAME from the refresh cookie:
+ *  Next's cookie jar is keyed by name, so setting the same name twice with
+ *  different paths overwrites rather than producing two Set-Cookie headers. */
+export const SESSION_MARKER = "i8_studio_session";
+
 const ACCESS_PATH = "/api/studio";
 const REFRESH_PATH = "/api/studio/refresh";
 
@@ -176,17 +183,14 @@ export async function setSessionCookies(access: string, refresh: string) {
   const jar = await cookies();
   jar.set(ACCESS_COOKIE, access, { ...base, path: ACCESS_PATH, maxAge: 60 * 15 });
   jar.set(REFRESH_COOKIE, refresh, { ...base, path: REFRESH_PATH, maxAge: 60 * 60 * 24 * 14 });
-  // Duplicate the refresh cookie at /studio purely so proxy.ts can see a session
-  // exists. It carries the same value but is never used to authenticate — the
-  // access cookie is what reaches Django.
-  jar.set(REFRESH_COOKIE, refresh, { ...base, path: "/studio", maxAge: 60 * 60 * 24 * 14 });
+  jar.set(SESSION_MARKER, "1", { ...base, path: "/studio", maxAge: 60 * 60 * 24 * 14 });
 }
 
 export async function clearSessionCookies() {
   const jar = await cookies();
   jar.delete({ name: ACCESS_COOKIE, path: ACCESS_PATH });
   jar.delete({ name: REFRESH_COOKIE, path: REFRESH_PATH });
-  jar.delete({ name: REFRESH_COOKIE, path: "/studio" });
+  jar.delete({ name: SESSION_MARKER, path: "/studio" });
 }
 
 export async function login(username: string, password: string) {
@@ -1004,18 +1008,9 @@ In `editor.tsx`, add `const [pickerOpen, setPickerOpen] = useState(false);`, pas
 
 - [ ] **Step 5: Add the figure controls (alignment and size)**
 
-Add a `NodeViewRenderer` for the `figure` node so a selected image shows a small floating control bar with four alignment options and four size options, each calling `editor.commands.updateAttributes("figure", { align })` / `{ size }`, plus Replace (reopens the picker) and Remove (`deleteSelection`). Register it by adding `addNodeView()` to the `Figure` node in `schema.ts` **guarded so the Node stays usable from Node.js** — the round-trip script imports the same module:
+Create `src/components/studio/figure-view.tsx`: a `NodeViewWrapper` rendering the image plus a small floating control bar shown when the node is selected — four alignment options and four size options, each calling `updateAttributes({ align })` / `updateAttributes({ size })`, plus Replace (reopens the picker) and Remove (`deleteNode`). The caption renders as a `NodeViewContent` inside a `<figcaption>` so it stays editable.
 
-```ts
-// in schema.ts, Figure node — only attach a node view in the browser
-  addNodeView() {
-    if (typeof window === "undefined") return null as never;
-    // ReactNodeViewRenderer is imported lazily by the studio; see figure-view.tsx
-    return undefined as never;
-  },
-```
-
-**Simpler and preferred:** leave `schema.ts` free of node views entirely, and in `editor.tsx` extend the imported node:
+**`schema.ts` must stay free of node views** — the Node.js round-trip script imports the same module and cannot load React components. Instead, extend the imported node in `editor.tsx`:
 
 ```tsx
 import { ReactNodeViewRenderer } from "@tiptap/react";

@@ -2653,26 +2653,16 @@ Expected: PASS.
 
 - [ ] **Step 5: Add the maintainer-only slug-change admin action**
 
-In `apps/blog/admin.py`:
+Slug changes on ranked URLs are an architectural decision, not an authoring one, so this lives in admin (maintainer-only) rather than the studio — see spec §6.5. In `apps/blog/admin.py`, add the imports:
 
 ```python
 from django.contrib import messages
 from django.db import transaction
 
 from apps.content.models import Redirect
-
-
-@admin.action(description="Change slug (creates a 301 and collapses chains)")
-def change_slug(modeladmin, request, queryset):
-    """Slug changes on ranked URLs are an architectural decision, not an
-    authoring one. This is the only supported path — see spec §6.5."""
-    messages.info(
-        request,
-        "Edit the slug field directly, then save. The 301 is created automatically.",
-    )
 ```
 
-And add to `BlogPostAdmin.save_model`:
+and add `save_model` to `BlogPostAdmin`:
 
 ```python
     def save_model(self, request, obj, form, change):
