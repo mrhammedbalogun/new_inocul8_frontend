@@ -9,6 +9,8 @@ import type { StudioPostDetail, MediaAssetT } from "@/lib/studio/types";
 import { Toolbar } from "@/components/studio/toolbar";
 import { MediaPicker } from "@/components/studio/media-picker";
 import { FigureView } from "@/components/studio/figure-view";
+import { useAutosave } from "@/lib/studio/use-autosave";
+import { SaveStatus } from "@/components/studio/save-status";
 
 // Builds the figure node content inserted for a freshly uploaded/selected asset. Width/height
 // come straight from the MediaAsset record returned by the upload endpoint and are stamped onto
@@ -37,6 +39,11 @@ export function PostEditor({ id }: { id: string }) {
   const [loadError, setLoadError] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [uploadNotice, setUploadNotice] = useState("");
+  // Mirrors the editor's current HTML into React state so it can flow into
+  // the autosave payload. Kept in sync via the `onUpdate` callback wired into
+  // `useEditor` below, including the initial `setContent` call once the post
+  // loads (Tiptap 3's setContent emits update by default).
+  const [html, setHtml] = useState("");
 
   // Tracks whether the picker was opened to insert a new image or to replace the image on an
   // already-selected figure node. Null = insert; a function = apply the chosen asset to that
@@ -124,6 +131,7 @@ export function PostEditor({ id }: { id: string }) {
     content: "",
     immediatelyRender: false, // required in the App Router: avoids SSR hydration mismatch
     editorProps: { attributes: { class: "service-prose focus:outline-none min-h-[60vh]" } },
+    onUpdate: ({ editor: e }) => setHtml(e.getHTML()),
   });
 
   useEffect(() => {
@@ -131,7 +139,11 @@ export function PostEditor({ id }: { id: string }) {
     studioFetch<StudioPostDetail>(`posts/${id}/`)
       .then((data) => {
         if (cancelled) return;
-        setPost(data);
+        // Resume from the unpublished draft shadow, not the live/published
+        // field, for both body and title — the same rule already applied to
+        // body here; title gets it too so a saved-but-unpublished title edit
+        // survives a reload instead of quietly reverting to the live one.
+        setPost({ ...data, title: data.draft_title || data.title });
         editor?.commands.setContent(data.draft_body || data.body || "<p></p>");
       })
       .catch((err: unknown) => {
@@ -142,6 +154,19 @@ export function PostEditor({ id }: { id: string }) {
       cancelled = true;
     };
   }, [id, editor]);
+
+  // Autosave owns only the fields this editor currently exposes (title,
+  // body). Only `draft_*` keys are sent — the live `title`/`body` fields are
+  // never touched here, which is what keeps autosaving a published post safe:
+  // the publish action is the only thing that promotes draft_* onto the live
+  // columns.
+  const autosave = useAutosave({
+    id,
+    enabled: Boolean(post) && post?.status !== "pending_review",
+    expectedUpdatedAt: post?.updated_at ?? null,
+    payload: { draft_title: post?.title ?? "", draft_body: html },
+    onSaved: (updatedAt) => setPost((p) => (p ? { ...p, updated_at: updatedAt } : p)),
+  });
 
   if (loadError) {
     return (
@@ -162,7 +187,18 @@ export function PostEditor({ id }: { id: string }) {
         className="w-full border-0 font-display text-3xl font-semibold outline-none placeholder:text-neutral-300"
       />
       <div className="mt-6 rounded-2xl border border-ink-900/8 bg-white">
-        <Toolbar editor={editor} onInsertImage={openPickerForInsert} />
+        <Toolbar
+          editor={editor}
+          onInsertImage={openPickerForInsert}
+          status={
+            <SaveStatus
+              state={autosave.state}
+              lastSavedAt={autosave.lastSavedAt}
+              error={autosave.error}
+              onRetry={autosave.saveNow}
+            />
+          }
+        />
         {uploadNotice && (
           <p role="alert" className="border-b border-ink-900/8 bg-red-50 px-4 py-2 text-sm text-red-600">
             {uploadNotice}

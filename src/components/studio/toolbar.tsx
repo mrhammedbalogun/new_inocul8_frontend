@@ -6,9 +6,9 @@ import {
   Minus, Link2, Image as ImageIcon, Info, Code,
 } from "lucide-react";
 
-type Props = { editor: Editor | null; onInsertImage: () => void };
+type Props = { editor: Editor | null; onInsertImage: () => void; status?: React.ReactNode };
 
-export function Toolbar({ editor, onInsertImage }: Props) {
+export function Toolbar({ editor, onInsertImage, status }: Props) {
   if (!editor) return null;
 
   const btn = (active: boolean) =>
@@ -166,6 +166,7 @@ export function Toolbar({ editor, onInsertImage }: Props) {
       >
         <Code className="size-4" />
       </button>
+      {status && <span className="ml-auto pl-2">{status}</span>}
     </div>
   );
 }
