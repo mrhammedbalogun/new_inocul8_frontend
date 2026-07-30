@@ -53,6 +53,26 @@ function toWorkingPost(data: StudioPostDetail): StudioPostDetail {
   };
 }
 
+// Mirrors the backend's slug style: lowercase, hyphen-separated, no edge dashes.
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 80)
+    .replace(/-$/, "");
+}
+
+// A slug still "follows the title" (WordPress-style) while the post has never
+// been published AND the author hasn't set one by hand: either it's the
+// untitled-<timestamp> placeholder from create, or it equals what the current
+// title would generate (i.e. the last auto-sync wrote it).
+function slugIsStillAuto(data: StudioPostDetail): boolean {
+  if (data.first_published_at) return false;
+  return /^untitled-\d+$/.test(data.slug) || data.slug === slugify(data.draft_title || data.title);
+}
+
 // Builds the figure node content inserted for a freshly uploaded/selected asset. Width/height
 // come straight from the MediaAsset record returned by the upload endpoint and are stamped onto
 // the node's attrs here — that pairing is the entire CLS-prevention mechanism: the sanitizer
@@ -97,6 +117,7 @@ export function PostEditor({ id }: { id: string }) {
   // either be silently dropped by the autosave endpoint or never leave local
   // state if routed through the debounced payload instead.
   const [slugError, setSlugError] = useState("");
+  const [slugIsAuto, setSlugIsAuto] = useState(false);
   const [categoriesError, setCategoriesError] = useState("");
   const [imageError, setImageError] = useState("");
   const [imageBusy, setImageBusy] = useState(false);
@@ -204,6 +225,7 @@ export function PostEditor({ id }: { id: string }) {
         // writes (draft_* with live fallback — see toWorkingPost); the
         // autosave payload below maps it back onto `draft_<field>`.
         setPost(toWorkingPost(data));
+        setSlugIsAuto(slugIsStillAuto(data));
         editor?.commands.setContent(data.draft_body || data.body || "<p></p>");
       })
       .catch((err: unknown) => {
@@ -282,6 +304,24 @@ export function PostEditor({ id }: { id: string }) {
     },
     [commitFields],
   );
+
+  // Sidebar edits come through here so a hand-set slug stops auto-following
+  // the title from then on.
+  const commitSlugManually = useCallback(
+    (slug: string) => {
+      setSlugIsAuto(false);
+      return commitSlug(slug);
+    },
+    [commitSlug],
+  );
+
+  // WordPress-style: until first publish, the URL slug follows the title.
+  // Runs on title blur (not per keystroke — each commit is a server PATCH).
+  const syncSlugFromTitle = useCallback(() => {
+    if (!post || !slugIsAuto || post.first_published_at) return;
+    const next = slugify(post.title);
+    if (next && next !== post.slug) void commitSlug(next);
+  }, [post, slugIsAuto, commitSlug]);
 
   const commitCategories = useCallback(
     async (ids: number[]) => {
@@ -489,6 +529,8 @@ export function PostEditor({ id }: { id: string }) {
     // working-value mapping is a clean refresh of status/published_at/
     // medically_reviewed_*/updated_at without touching the editor canvas.
     setPost(toWorkingPost(data));
+    // First publish locks the slug (SEO) — the title stops driving it.
+    setSlugIsAuto(false);
   }, []);
 
   if (loadError) {
@@ -515,7 +557,8 @@ export function PostEditor({ id }: { id: string }) {
           <input
             value={post.title}
             onChange={(e) => setPost({ ...post, title: e.target.value })}
-            placeholder="Post title"
+            onBlur={syncSlugFromTitle}
+            placeholder="Enter your blog post title here"
             className="min-w-0 flex-1 border-0 font-display text-3xl font-semibold outline-none placeholder:text-neutral-300"
           />
         ) : (
@@ -596,7 +639,7 @@ export function PostEditor({ id }: { id: string }) {
           categories={categories}
           authors={authors}
           onDraftChange={updateDraft}
-          onSlugCommit={commitSlug}
+          onSlugCommit={commitSlugManually}
           onCategoriesCommit={commitCategories}
           onFeaturedImageCommit={commitFeaturedImage}
           workflow={{

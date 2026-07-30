@@ -64,11 +64,12 @@ export function PostsTable() {
     setCreating(true);
     setCreateError("");
     try {
-      // draft_title, not title: `title` is the read-only live half of the
-      // shadow pair (only publish writes it), so it would be silently dropped.
+      // No seeded title: the editor's placeholder prompts for one, and the
+      // publish action refuses a blank draft_title — pre-filled text like
+      // "Untitled post" can slip through to a live page, a placeholder can't.
       const post = await studioFetch<StudioPostRow>("posts/", {
         method: "POST",
-        body: JSON.stringify({ draft_title: "Untitled post", slug: `untitled-${Date.now()}` }),
+        body: JSON.stringify({ slug: `untitled-${Date.now()}` }),
       });
       router.push(`/studio/posts/${post.id}`);
     } catch (err) {
