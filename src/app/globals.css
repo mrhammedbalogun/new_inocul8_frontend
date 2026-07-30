@@ -245,4 +245,71 @@
   .service-prose tbody tr:nth-child(even) {
     background: rgba(18, 33, 31, 0.02);
   }
+
+  /* Blog additions: ordered lists, figures and callouts. The existing ul rule
+     replaces markers with a ✓, which is right for service pages but wrong for
+     numbered steps — so scope numbering explicitly. */
+  .service-prose ol {
+    margin-top: 0.75rem;
+    padding-left: 1.5rem;
+    list-style: decimal;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .service-prose ol > li {
+    padding-left: 0.25rem;
+  }
+  .service-prose ol > li::before {
+    content: none;
+  }
+
+  /* Tiptap wraps list-item content in <p> (stock ProseMirror ListItem schema).
+     This pins the invariant that it renders identically to bare li text — today
+     that holds only because no .service-prose p margin rule exists, which is an
+     accident a future styling pass would silently break. */
+  .service-prose li > p {
+    margin: 0;
+  }
+
+  .service-prose figure {
+    margin-top: 1.75rem;
+  }
+  .service-prose figure img {
+    height: auto;          /* with width/height attributes present, reserves space — no CLS */
+    max-width: 100%;
+    border-radius: 0.75rem;
+  }
+  .service-prose figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    text-align: center;
+  }
+  .service-prose figure.align-left  { float: left;  margin-right: 1.5rem; max-width: 50%; }
+  .service-prose figure.align-right { float: right; margin-left: 1.5rem;  max-width: 50%; }
+  .service-prose figure.align-center { margin-inline: auto; }
+  .service-prose figure.size-small  { max-width: 20rem; }
+  .service-prose figure.size-medium { max-width: 32rem; }
+  .service-prose figure.size-large  { max-width: 100%; }
+
+  @media (max-width: 640px) {
+    /* Floats are unreadable on a phone — this site is mobile-first. */
+    .service-prose figure.align-left,
+    .service-prose figure.align-right {
+      float: none;
+      max-width: 100%;
+      margin-inline: 0;
+    }
+  }
+
+  .service-prose .callout {
+    margin-top: 1.5rem;
+    border-left: 3px solid var(--color-brand-600);
+    background: var(--color-brand-50);
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+  }
+  .service-prose .callout > * + * { margin-top: 0.75rem; }
+  .service-prose .callout-warning { border-color: #d97706; background: #fffbeb; }
+  .service-prose .callout-tip     { border-color: #059669; background: #ecfdf5; }
 }

@@ -22,6 +22,12 @@ export type BlogPost = {
   readingMinutes: number;
   wordCount: number;
   html: string;
+  featuredImage: { url: string; alt: string; width: number; height: number } | null;
+  author: { name: string; credentials: string; title: string; photoUrl: string | null } | null;
+  reviewedBy: { name: string; credentials: string; title: string } | null;
+  legacyTeamReviewed: boolean;
+  ogTitle: string;
+  ogDescription: string;
 };
 
 // Stored (WP) category slug -> public slug + name. The backend already stores
@@ -53,22 +59,44 @@ function remap(cats: Category[]): Category[] {
 }
 
 // ---- static fallback dataset ----
-const staticPosts: BlogPost[] = (rawStatic as BlogPost[])
+// The fallback JSON predates the studio fields. It holds exactly the 70
+// imported posts — precisely the set that carries the legacy team-review
+// badge — so legacyTeamReviewed defaults to true here.
+const staticPosts: BlogPost[] = (rawStatic as Omit<BlogPost, "featuredImage" | "author" | "reviewedBy" | "legacyTeamReviewed" | "ogTitle" | "ogDescription">[])
   .map((p) => {
     const categories = remap(p.categories);
     if (categories.length === 0) categories.push(CATEGORY_REMAP.uncategorized);
     const excerpt = p.excerpt || textFromHtml(p.html).slice(0, 155).replace(/\s\S*$/, "") + "…";
-    return { ...p, categories, excerpt };
+    return {
+      ...p,
+      categories,
+      excerpt,
+      featuredImage: null,
+      author: null,
+      reviewedBy: null,
+      legacyTeamReviewed: true,
+      ogTitle: "",
+      ogDescription: "",
+    };
   })
   .sort((a, b) => (a.date < b.date ? 1 : -1));
 
 // ---- API shapes ----
 type ApiCat = { name: string; slug: string; description?: string; post_count?: number };
+type ApiImage = { url: string; alt_text: string; caption?: string; width: number; height: number };
+type ApiAuthor = { name: string; slug?: string; credentials?: string; title?: string; bio?: string; photo_url?: string | null };
 type ApiPost = {
   id: number; title: string; slug: string; excerpt: string; body?: string;
   categories: ApiCat[]; tags: string[]; reading_minutes: number;
   published_at: string; updated_at?: string;
   meta_title?: string; meta_description?: string; focus_keyword?: string;
+  featured_image?: ApiImage | null;
+  author?: ApiAuthor | null;
+  medically_reviewed_by?: ApiAuthor | null;
+  medically_reviewed_at?: string | null;
+  legacy_team_reviewed?: boolean;
+  og_title?: string;
+  og_description?: string;
 };
 
 function mapPost(p: ApiPost): BlogPost {
@@ -87,6 +115,18 @@ function mapPost(p: ApiPost): BlogPost {
     readingMinutes: p.reading_minutes ?? 1,
     wordCount: 0,
     html: p.body ?? "",
+    featuredImage: p.featured_image
+      ? { url: p.featured_image.url, alt: p.featured_image.alt_text, width: p.featured_image.width, height: p.featured_image.height }
+      : null,
+    author: p.author
+      ? { name: p.author.name, credentials: p.author.credentials ?? "", title: p.author.title ?? "", photoUrl: p.author.photo_url ?? null }
+      : null,
+    reviewedBy: p.medically_reviewed_by
+      ? { name: p.medically_reviewed_by.name, credentials: p.medically_reviewed_by.credentials ?? "", title: p.medically_reviewed_by.title ?? "" }
+      : null,
+    legacyTeamReviewed: p.legacy_team_reviewed ?? false,
+    ogTitle: p.og_title ?? "",
+    ogDescription: p.og_description ?? "",
   };
 }
 

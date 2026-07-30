@@ -81,7 +81,26 @@ export function articleSchema(opts: {
   path: string;
   datePublished: string;
   dateModified: string;
+  author?: { name: string; credentials: string } | null;
+  reviewedBy?: { name: string; credentials: string } | null;
+  legacyTeamReviewed?: boolean;
 }) {
+  const org = { "@type": "Organization", name: "The Inocul8 Clinical Team", url: `${site.url}/about-us` };
+  const person = (p: { name: string; credentials: string }) => ({
+    "@type": "Person",
+    name: p.name,
+    ...(p.credentials ? { honorificSuffix: p.credentials } : {}),
+  });
+
+  // A reviewedBy claim is only emitted where a credentialed clinician actually
+  // attested (spec §6.4). Legacy imported posts keep the team-level claim they
+  // already shipped with; anything else emits no claim at all.
+  const reviewed = opts.reviewedBy
+    ? person(opts.reviewedBy)
+    : opts.legacyTeamReviewed
+      ? org
+      : null;
+
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -89,19 +108,10 @@ export function articleSchema(opts: {
     description: opts.description,
     datePublished: new Date(opts.datePublished.replace(" ", "T")).toISOString(),
     dateModified: new Date((opts.dateModified || opts.datePublished).replace(" ", "T")).toISOString(),
-    // E-E-A-T: name a subject-matter author + a medical review signal for YMYL
-    // health content (weighted heavily by Search and AI assistants).
-    author: {
-      "@type": "Organization",
-      name: "The Inocul8 Clinical Team",
-      url: `${site.url}/about-us`,
-    },
-    reviewedBy: {
-      "@type": "Organization",
-      name: "The Inocul8 Clinical Team",
-      url: `${site.url}/about-us`,
-    },
-    lastReviewed: new Date((opts.dateModified || opts.datePublished).replace(" ", "T")).toISOString(),
+    author: opts.author ? person(opts.author) : org,
+    ...(reviewed
+      ? { reviewedBy: reviewed, lastReviewed: new Date((opts.dateModified || opts.datePublished).replace(" ", "T")).toISOString() }
+      : {}),
     publisher: { "@id": `${site.url}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${site.url}${opts.path}` },
     url: `${site.url}${opts.path}`,
