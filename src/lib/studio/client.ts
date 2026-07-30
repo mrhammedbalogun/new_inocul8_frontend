@@ -7,9 +7,30 @@ export class StudioError extends Error {
   }
 }
 
-export async function studioFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+// Single-flight session refresh. The refresh cookie is deliberately scoped to
+// Path=/api/studio/refresh (see session.ts), so the BFF proxy can never
+// refresh inline on an ordinary studio call — the browser doesn't send the
+// cookie there. Instead the CLIENT calls the dedicated refresh route on a 401
+// and retries the original request once. Single-flight so the autosave loop
+// plus a workflow click hitting 401 together produce ONE rotation, not two.
+let refreshInFlight: Promise<boolean> | null = null;
+
+function refreshSession(): Promise<boolean> {
+  refreshInFlight ??= fetch("/api/studio/refresh/", {
+    method: "POST",
+    headers: { "X-Studio-Request": "1" },
+  })
+    .then((res) => res.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshInFlight = null;
+    });
+  return refreshInFlight;
+}
+
+function rawStudioFetch(path: string, init: RequestInit): Promise<Response> {
   const isForm = init.body instanceof FormData;
-  const res = await fetch(`/api/studio/${path}`, {
+  return fetch(`/api/studio/${path}`, {
     ...init,
     headers: {
       ...(isForm ? {} : { "Content-Type": "application/json" }),
@@ -17,6 +38,21 @@ export async function studioFetch<T>(path: string, init: RequestInit = {}): Prom
       ...init.headers,
     },
   });
+}
+
+export async function studioFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  let res = await rawStudioFetch(path, init);
+
+  if (res.status === 401) {
+    // Retry the original request once REGARDLESS of whether our own refresh
+    // call reported success: with two tabs racing a rotation, this tab's
+    // refresh can lose while the other tab has already updated the shared
+    // access cookie — the retry below carries whatever cookie the browser
+    // holds NOW. A session that is genuinely dead just 401s again and falls
+    // through to the error path (autosave's re-login affordance, unchanged).
+    await refreshSession();
+    res = await rawStudioFetch(path, init);
+  }
 
   const data = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {
