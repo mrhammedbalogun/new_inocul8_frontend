@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { EditorContent, ReactNodeViewRenderer, useEditor } from "@tiptap/react";
 import FileHandler from "@tiptap/extension-file-handler";
 import { EDITOR_EXTENSIONS, Figure } from "@/lib/editor/schema";
@@ -501,7 +503,14 @@ export function PostEditor({ id }: { id: string }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <Link
+        href="/studio"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-700 transition-colors hover:text-brand-700"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        All posts
+      </Link>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         {tab === "edit" ? (
           <input
             value={post.title}
