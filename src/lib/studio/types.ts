@@ -19,7 +19,7 @@ export type StudioAuthorT = {
 export type StudioCategoryT = { id: number; name: string; slug: string };
 
 export type StudioPostRow = {
-  id: number; title: string; slug: string; status: PostStatus;
+  id: number; title: string; draft_title: string; slug: string; status: PostStatus;
   published_at: string | null; updated_at: string;
   author_name: string; featured_image: MediaAssetT | null; is_featured: boolean;
 };

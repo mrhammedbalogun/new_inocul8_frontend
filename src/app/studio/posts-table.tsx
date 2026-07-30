@@ -64,9 +64,11 @@ export function PostsTable() {
     setCreating(true);
     setCreateError("");
     try {
+      // draft_title, not title: `title` is the read-only live half of the
+      // shadow pair (only publish writes it), so it would be silently dropped.
       const post = await studioFetch<StudioPostRow>("posts/", {
         method: "POST",
-        body: JSON.stringify({ title: "Untitled post", slug: `untitled-${Date.now()}` }),
+        body: JSON.stringify({ draft_title: "Untitled post", slug: `untitled-${Date.now()}` }),
       });
       router.push(`/studio/posts/${post.id}`);
     } catch (err) {
@@ -78,7 +80,7 @@ export function PostsTable() {
   const visible = rows.filter(
     (r) =>
       (filter === "all" || r.status === filter) &&
-      r.title.toLowerCase().includes(query.toLowerCase())
+      (r.draft_title || r.title).toLowerCase().includes(query.toLowerCase())
   );
 
   return (
@@ -142,7 +144,7 @@ export function PostsTable() {
                 href={`/studio/posts/${row.id}`}
                 className="flex items-center gap-4 p-4 hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
               >
-                <span className="flex-1 font-medium">{row.title || "(untitled)"}</span>
+                <span className="flex-1 font-medium">{row.draft_title || row.title || "(untitled)"}</span>
                 <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_CLASS[row.status]}`}>
                   {STATUS_LABEL[row.status]}
                 </span>
