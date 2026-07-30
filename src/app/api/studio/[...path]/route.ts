@@ -50,6 +50,15 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
     res = await forward(req, path, fresh);
   }
 
+  // Bodiless statuses (Django returns 204 on every successful DELETE) must be
+  // relayed with NO body and NO Content-Type: constructing a NextResponse with
+  // a (even empty) buffer + forced JSON Content-Type for a 204 throws inside
+  // Next's Response handling and surfaced as a 500 — so every successful
+  // delete reported failure to the user while actually succeeding.
+  if (res.status === 204 || res.status === 205 || res.status === 304) {
+    return new NextResponse(null, { status: res.status });
+  }
+
   const payload = await res.arrayBuffer();
   return new NextResponse(payload, {
     status: res.status,
