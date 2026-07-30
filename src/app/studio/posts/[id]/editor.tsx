@@ -19,6 +19,8 @@ import { useAutosave } from "@/lib/studio/use-autosave";
 import { SaveStatus } from "@/components/studio/save-status";
 import { Sidebar } from "@/components/studio/sidebar";
 import { Preview } from "@/components/studio/preview";
+import { PublishDialog } from "@/components/studio/publish-dialog";
+import { ReviewBanner } from "@/components/studio/review-banner";
 
 // Some legacy WP-imported posts store the literal string "NULL" instead of an
 // empty value in meta_description/focus_keyword (Rank Math was never run
@@ -27,6 +29,26 @@ import { Preview } from "@/components/studio/preview";
 // as if it were real content the author typed.
 function cleanMeta(v: string): string {
   return v === "NULL" ? "" : v;
+}
+
+// Maps a server StudioPostDetail onto the WORKING post this editor displays:
+// every autosaved field resumes from its draft_* shadow with a live fallback,
+// so a saved-but-unpublished edit survives a reload instead of quietly
+// reverting to the live value. Used on initial load AND after any workflow
+// action that returns a full detail (publish, discard) — after those, draft_*
+// and live are equal, so the mapping is a no-op that still refreshes
+// updated_at/status/medically_reviewed_* correctly.
+function toWorkingPost(data: StudioPostDetail): StudioPostDetail {
+  return {
+    ...data,
+    title: data.draft_title || data.title,
+    tags: data.draft_tags.length > 0 ? data.draft_tags : data.tags,
+    meta_title: cleanMeta(data.draft_meta_title) || cleanMeta(data.meta_title),
+    meta_description: cleanMeta(data.draft_meta_description) || cleanMeta(data.meta_description),
+    focus_keyword: cleanMeta(data.draft_focus_keyword) || cleanMeta(data.focus_keyword),
+    og_title: cleanMeta(data.draft_og_title) || cleanMeta(data.og_title),
+    og_description: cleanMeta(data.draft_og_description) || cleanMeta(data.og_description),
+  };
 }
 
 // Builds the figure node content inserted for a freshly uploaded/selected asset. Width/height
@@ -176,23 +198,10 @@ export function PostEditor({ id }: { id: string }) {
     studioFetch<StudioPostDetail>(`posts/${id}/`)
       .then((data) => {
         if (cancelled) return;
-        // Resume every autosaved field from its draft_* shadow, not the
-        // live/published field — the same rule already applied to body and
-        // title here; the SEO/tags fields get it too so a saved-but-
-        // unpublished edit survives a reload instead of quietly reverting to
-        // the live value. `post.<field>` below is the working display value
-        // this editor reads and writes; editor.tsx is what maps it back onto
-        // `draft_<field>` in the autosave payload.
-        setPost({
-          ...data,
-          title: data.draft_title || data.title,
-          tags: data.draft_tags.length > 0 ? data.draft_tags : data.tags,
-          meta_title: cleanMeta(data.draft_meta_title) || cleanMeta(data.meta_title),
-          meta_description: cleanMeta(data.draft_meta_description) || cleanMeta(data.meta_description),
-          focus_keyword: cleanMeta(data.draft_focus_keyword) || cleanMeta(data.focus_keyword),
-          og_title: cleanMeta(data.draft_og_title) || cleanMeta(data.og_title),
-          og_description: cleanMeta(data.draft_og_description) || cleanMeta(data.og_description),
-        });
+        // `post.<field>` is the working display value this editor reads and
+        // writes (draft_* with live fallback — see toWorkingPost); the
+        // autosave payload below maps it back onto `draft_<field>`.
+        setPost(toWorkingPost(data));
         editor?.commands.setContent(data.draft_body || data.body || "<p></p>");
       })
       .catch((err: unknown) => {
@@ -299,6 +308,53 @@ export function PostEditor({ id }: { id: string }) {
     [commitFields],
   );
 
+  // ---- Workflow (Task 10): submit/withdraw/request-changes/publish/
+  // unpublish/discard, all owned here next to the post state they mutate. ----
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [workflowBusy, setWorkflowBusy] = useState<string | null>(null);
+  const [workflowError, setWorkflowError] = useState("");
+
+  // submit/withdraw/request-changes/unpublish return only `{status}` — but
+  // every one of them post.save()s server-side, which bumps the auto_now
+  // updated_at. Without refetching, the next autosave would send the OLD
+  // expected_updated_at and get a spurious stale-write "reload" prompt right
+  // after a successful action. Refetch and merge ONLY the workflow-owned
+  // fields — never the working text fields, which may hold in-flight edits.
+  const refreshWorkflowMeta = useCallback(async () => {
+    const data = await studioFetch<StudioPostDetail>(`posts/${id}/`);
+    setPost((p) =>
+      p
+        ? {
+            ...p,
+            status: data.status,
+            review_note: data.review_note,
+            updated_at: data.updated_at,
+            published_at: data.published_at,
+            first_published_at: data.first_published_at,
+            has_pending_changes: data.has_pending_changes,
+            medically_reviewed_by: data.medically_reviewed_by,
+            medically_reviewed_at: data.medically_reviewed_at,
+          }
+        : p,
+    );
+  }, [id]);
+
+  const runWorkflow = useCallback(async (name: string, run: () => Promise<void>) => {
+    setWorkflowBusy(name);
+    setWorkflowError("");
+    try {
+      await run();
+    } catch (err) {
+      // Server messages are written for staff ("Tell the author what needs
+      // changing.", "This post is live…use 'Unpublish'") — show them verbatim.
+      setWorkflowError(
+        err instanceof StudioError ? err.message : "Something went wrong — check your connection and try again.",
+      );
+    } finally {
+      setWorkflowBusy(null);
+    }
+  }, []);
+
   // Autosave owns the draft_* shadow fields this editor exposes (title, body,
   // tags, and the SEO/social fields). Only `draft_*` keys are sent — the live
   // fields are never touched here, which is what keeps autosaving a published
@@ -327,8 +383,111 @@ export function PostEditor({ id }: { id: string }) {
       draft_og_title: post?.og_title ?? "",
       draft_og_description: post?.og_description ?? "",
     },
-    onSaved: (updatedAt) => setPost((p) => (p ? { ...p, updated_at: updatedAt } : p)),
+    onSaved: (updatedAt) =>
+      setPost((p) =>
+        p
+          ? {
+              ...p,
+              updated_at: updatedAt,
+              // The server recomputes has_pending_changes on every draft save,
+              // but the autosave response doesn't include it — mirror it
+              // locally for the statuses where "your edits aren't live yet"
+              // matters, so the sidebar's unsaved-to-live block appears as soon
+              // as a live post is edited, not only after a full reload.
+              has_pending_changes:
+                p.status === "published" || p.status === "scheduled" ? true : p.has_pending_changes,
+            }
+          : p,
+      ),
   });
+
+  const submitForReview = useCallback(
+    () =>
+      runWorkflow("submit", async () => {
+        // Flush the debounce first so the reviewer reads the words as they are
+        // on screen, not as of 2 seconds ago. saveNow never throws (it reports
+        // through the save-status chip); if it failed, submit still proceeds
+        // with the last content the server has — the reviewer sees THAT, which
+        // is at least an honest snapshot.
+        await autosave.saveNow();
+        await studioFetch(`posts/${id}/submit/`, { method: "POST" });
+        await refreshWorkflowMeta();
+      }),
+    [runWorkflow, autosave, id, refreshWorkflowMeta],
+  );
+
+  const withdrawFromReview = useCallback(
+    () =>
+      runWorkflow("withdraw", async () => {
+        await studioFetch(`posts/${id}/withdraw/`, { method: "POST" });
+        await refreshWorkflowMeta();
+      }),
+    [runWorkflow, id, refreshWorkflowMeta],
+  );
+
+  const requestChanges = useCallback(
+    (note: string) =>
+      runWorkflow("request-changes", async () => {
+        // No client-side "note required" gate: the server validates (400 with
+        // "Tell the author what needs changing.") and that message is surfaced
+        // verbatim — one source of truth for what counts as a usable note.
+        await studioFetch(`posts/${id}/request-changes/`, {
+          method: "POST",
+          body: JSON.stringify({ note }),
+        });
+        await refreshWorkflowMeta();
+      }),
+    [runWorkflow, id, refreshWorkflowMeta],
+  );
+
+  const unpublish = useCallback(
+    () =>
+      runWorkflow("unpublish", async () => {
+        await studioFetch(`posts/${id}/unpublish/`, { method: "POST" });
+        await refreshWorkflowMeta();
+      }),
+    [runWorkflow, id, refreshWorkflowMeta],
+  );
+
+  // POST discard/ — the backend restores every draft_* column from its live
+  // twin (the only way back to the published text once autosave has
+  // overwritten a draft). The editor canvas must then be reset to the restored
+  // body: setContent emits an update, so `html` and the autosave payload
+  // re-sync automatically.
+  const discardEdits = useCallback(
+    () =>
+      runWorkflow("discard", async () => {
+        const data = await studioFetch<StudioPostDetail>(`posts/${id}/discard/`, { method: "POST" });
+        setPost(toWorkingPost(data));
+        editor?.commands.setContent(data.draft_body || data.body || "<p></p>");
+        // The content swap above is server state, not an edit — without this,
+        // autosave would treat it as dirty, fire an echo-PATCH, and falsely
+        // re-flag "unsaved-to-live edits" right after the user discarded them.
+        autosave.markClean();
+      }),
+    [runWorkflow, id, editor, autosave],
+  );
+
+  // Flush the debounce BEFORE showing the dialog, so what the checklist and
+  // the eventual promote both operate on is what's on screen right now. The
+  // fresh updated_at lands in post state via onSaved, and the dialog reads
+  // `post` live from state — so its expected_updated_at is current by the
+  // time anyone can click Publish.
+  const openPublishDialog = useCallback(
+    () =>
+      runWorkflow("open-publish", async () => {
+        await autosave.saveNow();
+        setPublishOpen(true);
+      }),
+    [runWorkflow, autosave],
+  );
+
+  const handlePublished = useCallback((data: StudioPostDetail) => {
+    // Full detail response: after a publish, draft_* equals live, so the
+    // working-value mapping is a clean refresh of status/published_at/
+    // medically_reviewed_*/updated_at without touching the editor canvas.
+    setPost(toWorkingPost(data));
+  }, []);
 
   if (loadError) {
     return (
@@ -380,6 +539,13 @@ export function PostEditor({ id }: { id: string }) {
         </div>
       </div>
 
+      <ReviewBanner
+        post={post}
+        me={me}
+        onWithdraw={withdrawFromReview}
+        withdrawBusy={workflowBusy === "withdraw"}
+      />
+
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0">
           {/* The edit canvas stays mounted (just hidden) rather than being
@@ -424,6 +590,18 @@ export function PostEditor({ id }: { id: string }) {
           onSlugCommit={commitSlug}
           onCategoriesCommit={commitCategories}
           onFeaturedImageCommit={commitFeaturedImage}
+          workflow={{
+            me,
+            busy: workflowBusy,
+            error: workflowError,
+            onSaveDraft: autosave.saveNow,
+            onSubmit: submitForReview,
+            onWithdraw: withdrawFromReview,
+            onPublish: openPublishDialog,
+            onRequestChanges: requestChanges,
+            onUnpublish: unpublish,
+            onDiscard: discardEdits,
+          }}
           slugError={slugError}
           categoriesError={categoriesError}
           imageError={imageError}
@@ -432,6 +610,17 @@ export function PostEditor({ id }: { id: string }) {
       </div>
 
       <MediaPicker open={pickerOpen} onClose={closePicker} onSelect={handleSelectAsset} />
+
+      {me && (
+        <PublishDialog
+          post={post}
+          me={me}
+          html={html}
+          open={publishOpen}
+          onClose={() => setPublishOpen(false)}
+          onPublished={handlePublished}
+        />
+      )}
     </div>
   );
 }

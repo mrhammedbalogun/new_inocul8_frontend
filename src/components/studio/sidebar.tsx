@@ -9,8 +9,32 @@ import {
   type MediaAssetT,
   type StudioAuthorT,
   type StudioCategoryT,
+  type StudioMe,
   type StudioPostDetail,
 } from "@/lib/studio/types";
+
+/** Workflow callbacks owned by editor.tsx (the component that owns the post
+ *  state and the studioFetch mutations). The sidebar only decides WHICH
+ *  buttons a given role/status combination gets to see — every actual
+ *  transition, and every server error message, lives with the caller. */
+export type WorkflowProps = {
+  /** null while /me is loading or if it failed — actions are hidden rather
+   *  than guessed, because showing "Publish" to someone the server will 403
+   *  teaches staff the buttons lie. */
+  me: StudioMe | null;
+  /** Name of the action currently in flight, or null. Disables everything —
+   *  two overlapping workflow transitions is never a state anyone wants. */
+  busy: string | null;
+  /** Last workflow error, verbatim from the server where possible. */
+  error: string;
+  onSaveDraft: () => void;
+  onSubmit: () => void;
+  onWithdraw: () => void;
+  onPublish: () => void;
+  onRequestChanges: (note: string) => void;
+  onUnpublish: () => void;
+  onDiscard: () => void;
+};
 
 type Props = {
   post: StudioPostDetail;
@@ -28,6 +52,7 @@ type Props = {
   onSlugCommit: (slug: string) => void;
   onCategoriesCommit: (ids: number[]) => void;
   onFeaturedImageCommit: (asset: MediaAssetT | null) => void;
+  workflow: WorkflowProps;
   slugError?: string;
   categoriesError?: string;
   imageError?: string;
@@ -46,6 +71,7 @@ export function Sidebar({
   onSlugCommit,
   onCategoriesCommit,
   onFeaturedImageCommit,
+  workflow,
   slugError,
   categoriesError,
   imageError,
@@ -152,12 +178,7 @@ export function Sidebar({
           )}
         </div>
 
-        {/* Submit-for-review / publish / request-changes actions land here once
-            Task 10 wires the workflow endpoints. Deliberately left as a labeled
-            seam rather than a stub — there's nothing here to click yet. */}
-        <div className="mt-4 border-t border-ink-900/8 pt-3 text-xs text-muted">
-          Workflow actions (submit for review, publish) are added in a later task.
-        </div>
+        <WorkflowActions post={post} workflow={workflow} />
       </section>
 
       <FeaturedImage post={post} onChange={onFeaturedImageCommit} busy={imageBusy} error={imageError} />
@@ -228,5 +249,241 @@ export function Sidebar({
 
       <SeoPanel post={post} onChange={onDraftChange} />
     </aside>
+  );
+}
+
+/** Two-step inline confirmation for a destructive action. Deliberately NOT a
+ *  modal: swapping the button in place keeps keyboard focus exactly where the
+ *  user already is, needs no focus trap, and can't be dismissed by accident —
+ *  the destructive request only ever fires from the explicit "Yes" button. */
+function ConfirmableAction({
+  label,
+  busyLabel,
+  warning,
+  confirmLabel,
+  busy,
+  disabled,
+  onConfirm,
+}: {
+  label: string;
+  busyLabel: string;
+  warning: string;
+  confirmLabel: string;
+  busy: boolean;
+  disabled: boolean;
+  onConfirm: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        disabled={disabled}
+        className="w-full rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60"
+      >
+        {busy ? busyLabel : label}
+      </button>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-red-200 bg-red-50/60 p-2.5">
+      <p className="text-xs text-red-800">{warning}</p>
+      <div className="mt-2 flex gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setConfirming(false);
+            onConfirm();
+          }}
+          disabled={disabled}
+          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-60"
+        >
+          {confirmLabel}
+        </button>
+        <button
+          type="button"
+          onClick={() => setConfirming(false)}
+          className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-700 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+        >
+          Never mind
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Role- and status-gated workflow buttons. Mirrors the SERVER's rules rather
+ *  than inventing its own:
+ *   - submit/withdraw are refused on a published post (server 403 — the
+ *     unpublish backdoor), so an author with pending edits on a live post is
+ *     told to hand over to an editor instead of being given a doomed button.
+ *   - request-changes/publish/unpublish need review/publish permission, so
+ *     they only render for accounts /me says have it. */
+function WorkflowActions({ post, workflow }: { post: StudioPostDetail; workflow: WorkflowProps }) {
+  const { me, busy, error } = workflow;
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [note, setNote] = useState("");
+
+  const primary =
+    "w-full rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 disabled:opacity-60";
+  const secondary =
+    "w-full rounded-lg border border-ink-900/12 px-3 py-2 text-sm font-medium text-ink-900 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 disabled:opacity-60";
+
+  if (!me) {
+    return (
+      <div className="mt-4 border-t border-ink-900/8 pt-3 text-xs text-muted">
+        Couldn't load your permissions, so the publish and review actions are hidden. Reload the
+        page to try again.
+      </div>
+    );
+  }
+
+  const status = post.status;
+  const anyBusy = busy !== null;
+  // The review freeze is one-directional: it blocks the submitter, not a
+  // reviewer who is allowed to keep editing a pending post (same rule the
+  // autosave `enabled` gate applies in editor.tsx).
+  const frozenForThisUser = status === "pending_review" && !me.can_review;
+
+  return (
+    <div className="mt-4 space-y-2 border-t border-ink-900/8 pt-4">
+      {error && (
+        <p role="alert" className="rounded-lg bg-red-50 p-2.5 text-xs text-red-700">
+          {error}
+        </p>
+      )}
+
+      {!frozenForThisUser && (
+        <button type="button" onClick={workflow.onSaveDraft} disabled={anyBusy} className={secondary}>
+          Save draft
+        </button>
+      )}
+
+      {/* ---- Author actions (no publish permission) ---- */}
+      {!me.can_publish && (status === "draft" || status === "changes_requested") && (
+        <button type="button" onClick={workflow.onSubmit} disabled={anyBusy} className={primary}>
+          {busy === "submit" ? "Submitting…" : "Submit for review"}
+        </button>
+      )}
+      {!me.can_publish && status === "pending_review" && (
+        <button type="button" onClick={workflow.onWithdraw} disabled={anyBusy} className={secondary}>
+          {busy === "withdraw" ? "Withdrawing…" : "Withdraw from review"}
+        </button>
+      )}
+
+      {/* ---- Editor actions ---- */}
+      {me.can_publish && status !== "published" && (
+        <button type="button" onClick={workflow.onPublish} disabled={anyBusy} className={primary}>
+          {busy === "open-publish"
+            ? "Saving…"
+            : status === "scheduled"
+              ? "Reschedule / publish now…"
+              : status === "pending_review"
+                ? "Approve and publish…"
+                : "Publish…"}
+        </button>
+      )}
+
+      {me.can_publish && me.can_review && status === "pending_review" && (
+        <>
+          {noteOpen ? (
+            <div className="rounded-lg border border-ink-900/12 p-2.5">
+              <label htmlFor="review-note" className="text-xs font-medium">
+                What needs changing?
+              </label>
+              <textarea
+                id="review-note"
+                rows={3}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Tell the author what to fix — they'll see this note on the post."
+                className="mt-1 w-full rounded-lg border border-ink-900/12 px-2.5 py-1.5 text-sm"
+              />
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => workflow.onRequestChanges(note)}
+                  disabled={anyBusy}
+                  className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:opacity-60"
+                >
+                  {busy === "request-changes" ? "Sending…" : "Send back to author"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNoteOpen(false);
+                    setNote("");
+                  }}
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-700 hover:bg-neutral-100"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setNoteOpen(true)} disabled={anyBusy} className={secondary}>
+              Request changes
+            </button>
+          )}
+        </>
+      )}
+
+      {/* ---- Published post with edits that haven't gone live ---- */}
+      {status === "published" && post.has_pending_changes && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <p className="text-xs font-semibold text-amber-900">
+            Published — you have unsaved-to-live edits
+          </p>
+          <p className="mt-1 text-xs text-amber-800">
+            {me.can_publish
+              ? "The live article still shows the last published version."
+              : "The live article still shows the last published version. A live post can't be submitted for review — ask an editor to publish your changes."}
+          </p>
+          <div className="mt-2 space-y-2">
+            {me.can_publish && (
+              <button type="button" onClick={workflow.onPublish} disabled={anyBusy} className={primary}>
+                {busy === "open-publish" ? "Saving…" : "Update live post…"}
+              </button>
+            )}
+            <ConfirmableAction
+              label="Discard my edits"
+              busyLabel="Discarding…"
+              warning="This permanently throws away every edit made since the post last went live and restores the live text. It cannot be undone."
+              confirmLabel="Yes, discard my edits"
+              busy={busy === "discard"}
+              disabled={anyBusy}
+              onConfirm={workflow.onDiscard}
+            />
+          </div>
+        </div>
+      )}
+
+      {me.can_publish && status === "published" && (
+        <ConfirmableAction
+          label="Unpublish"
+          busyLabel="Unpublishing…"
+          warning="This takes the post off the public site immediately — its address stops working until it's published again. For search-ranked posts that can cost rankings."
+          confirmLabel="Yes, unpublish"
+          busy={busy === "unpublish"}
+          disabled={anyBusy}
+          onConfirm={workflow.onUnpublish}
+        />
+      )}
+
+      {me.can_publish && status === "scheduled" && (
+        <ConfirmableAction
+          label="Cancel scheduled publish"
+          busyLabel="Cancelling…"
+          warning="This stops the scheduled publish and returns the post to draft. Nothing goes live until it's published again."
+          confirmLabel="Yes, cancel the schedule"
+          busy={busy === "unpublish"}
+          disabled={anyBusy}
+          onConfirm={workflow.onUnpublish}
+        />
+      )}
+    </div>
   );
 }

@@ -91,6 +91,18 @@ export function useAutosave<T extends Record<string, unknown>>(opts: {
     }
   }, []);
 
+  // Forget the current baseline and adopt whatever the NEXT payload render
+  // produces as "already persisted" — the same semantics as the initial load.
+  // For callers that just replaced the editor content with server state (e.g.
+  // the discard action restoring the live text): without this, the content
+  // swap looks like an edit, schedules a redundant echo-PATCH of values the
+  // server already holds, and (on a published post) falsely re-flags
+  // "unsaved-to-live edits" the instant the user discarded them.
+  const markClean = useCallback(() => {
+    clearTimer();
+    baseline.current = null;
+  }, [clearTimer]);
+
   const saveNow = useCallback(async () => {
     clearTimer();
     setState("saving");
@@ -165,5 +177,5 @@ export function useAutosave<T extends Record<string, unknown>>(opts: {
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [state]);
 
-  return { state, lastSavedAt, error, saveNow };
+  return { state, lastSavedAt, error, saveNow, markClean };
 }
