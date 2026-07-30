@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Clock, Calendar, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Breadcrumbs } from "@/components/service/breadcrumbs";
@@ -35,12 +36,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: post.focusKeyword ? [post.focusKeyword] : undefined,
     alternates: { canonical: `/${post.slug}` },
     openGraph: {
-      title: post.title,
-      description,
+      title: post.ogTitle || post.title,
+      description: post.ogDescription || description,
       url: `/${post.slug}`,
       type: "article",
       publishedTime: new Date(post.date.replace(" ", "T")).toISOString(),
       modifiedTime: new Date((post.modified || post.date).replace(" ", "T")).toISOString(),
+      images: post.featuredImage ? [{ url: post.featuredImage.url, alt: post.featuredImage.alt }] : undefined,
     },
   };
 }
@@ -69,6 +71,9 @@ export default async function PostPage({ params }: Props) {
             path: `/${post.slug}`,
             datePublished: post.date,
             dateModified: post.modified,
+            author: post.author,
+            reviewedBy: post.reviewedBy,
+            legacyTeamReviewed: post.legacyTeamReviewed,
           }),
         ]}
       />
@@ -93,10 +98,14 @@ export default async function PostPage({ params }: Props) {
               <Clock className="size-4" />
               {post.readingMinutes} min read
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
-              <ShieldCheck className="size-4" />
-              Medically reviewed
-            </span>
+            {(post.reviewedBy || post.legacyTeamReviewed) && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
+                <ShieldCheck className="size-4" />
+                {post.reviewedBy
+                  ? `Medically reviewed by ${post.reviewedBy.name}${post.reviewedBy.credentials ? `, ${post.reviewedBy.credentials}` : ""}`
+                  : "Medically reviewed"}
+              </span>
+            )}
           </div>
           <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-ink-900 sm:text-4xl">
             {post.title}
@@ -106,6 +115,19 @@ export default async function PostPage({ params }: Props) {
 
       <section className="py-12 sm:py-16">
         <Container className="max-w-3xl">
+          {post.featuredImage && (
+            <figure className="mb-10">
+              <Image
+                src={post.featuredImage.url}
+                alt={post.featuredImage.alt}
+                width={post.featuredImage.width}
+                height={post.featuredImage.height}
+                priority
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="h-auto w-full rounded-2xl"
+              />
+            </figure>
+          )}
           <ServiceProse html={post.html} />
 
           {post.tags.length > 0 && (
@@ -127,18 +149,52 @@ export default async function PostPage({ params }: Props) {
             <ShareButtons slug={post.slug} title={post.title} />
           </div>
 
-          <div className="mt-8 flex items-center gap-4 rounded-2xl border border-ink-900/8 bg-white p-6 shadow-soft">
-            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-brand-600 font-display text-lg font-semibold text-white">
-              I8
-            </span>
-            <div>
-              <p className="font-semibold text-ink-900">The Inocul8 Clinical Team</p>
-              <p className="mt-0.5 text-sm text-muted">
-                Written and medically reviewed by Inocul8&rsquo;s preventive-health clinicians —
-                trustworthy vaccine guidance for Nigeria. Last reviewed {formatDate(post.modified || post.date)}.
-              </p>
+          {post.author ? (
+            <div className="mt-8 flex items-center gap-4 rounded-2xl border border-ink-900/8 bg-white p-6 shadow-soft">
+              {post.author.photoUrl ? (
+                <Image
+                  src={post.author.photoUrl}
+                  alt={post.author.name}
+                  width={48}
+                  height={48}
+                  className="size-12 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <span className="grid size-12 shrink-0 place-items-center rounded-full bg-brand-600 font-display text-lg font-semibold text-white">
+                  {post.author.name.charAt(0)}
+                </span>
+              )}
+              <div>
+                <p className="font-semibold text-ink-900">
+                  {post.author.name}
+                  {post.author.credentials ? `, ${post.author.credentials}` : ""}
+                </p>
+                <p className="mt-0.5 text-sm text-muted">
+                  {post.author.title}
+                  {post.reviewedBy && (
+                    <>
+                      {post.author.title ? " · " : ""}
+                      Medically reviewed by {post.reviewedBy.name}
+                      {post.reviewedBy.credentials ? `, ${post.reviewedBy.credentials}` : ""}.
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-8 flex items-center gap-4 rounded-2xl border border-ink-900/8 bg-white p-6 shadow-soft">
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-brand-600 font-display text-lg font-semibold text-white">
+                I8
+              </span>
+              <div>
+                <p className="font-semibold text-ink-900">The Inocul8 Clinical Team</p>
+                <p className="mt-0.5 text-sm text-muted">
+                  Written and medically reviewed by Inocul8&rsquo;s preventive-health clinicians —
+                  trustworthy vaccine guidance for Nigeria. Last reviewed {formatDate(post.modified || post.date)}.
+                </p>
+              </div>
+            </div>
+          )}
         </Container>
       </section>
 
