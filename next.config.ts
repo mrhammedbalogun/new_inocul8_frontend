@@ -10,9 +10,11 @@ const csp = [
   // React dev mode needs eval() for source maps; never allowed in production.
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://api.inocul8.com.ng",
+  "img-src 'self' data: blob: https://api.inocul8.com.ng https://inocul8-website-s3.s3.eu-west-1.amazonaws.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://api.inocul8.com.ng",
+  // The S3 host in connect-src is for the studio's presigned direct uploads
+  // (browser PUTs the file to S3, bypassing Vercel's 4.5MB body cap).
+  "connect-src 'self' https://api.inocul8.com.ng https://inocul8-website-s3.s3.eu-west-1.amazonaws.com",
   "frame-src https://www.google.com https://maps.google.com", // contact-page map embed
   "object-src 'none'",
   "base-uri 'self'",
@@ -49,6 +51,11 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "api.inocul8.com.ng", pathname: "/media/**" },
+      {
+        protocol: "https",
+        hostname: "inocul8-website-s3.s3.eu-west-1.amazonaws.com",
+        pathname: "/media/**",
+      },
     ],
   },
   async headers() {
