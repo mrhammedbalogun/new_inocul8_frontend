@@ -9,7 +9,7 @@ export const site = {
     "Convenient and affordable vaccination and preventive health services at your convenience across Lagos — childhood immunization, travel health & yellow fever cards, adult vaccines, and corporate wellness in Nigeria.",
   url: "https://inocul8.com.ng",
   email: "info@inocul8.com.ng",
-  phones: ["07063736485", "08160962414"],
+  phones: ["07063736485"],
   whatsapp: "2347063736485",
   hours: "Mon – Sat, 08:30 – 18:00",
   rating: { value: 4.9, count: 59 },
