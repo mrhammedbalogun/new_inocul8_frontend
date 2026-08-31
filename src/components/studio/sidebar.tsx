@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FeaturedImage } from "@/components/studio/featured-image";
 import { SeoPanel } from "@/components/studio/seo-panel";
+import { byline } from "@/lib/author-byline";
 import {
   STATUS_CLASS,
   STATUS_LABEL,
@@ -242,7 +243,7 @@ export function Sidebar({
 
         <h2 className="mt-4 font-semibold">Author</h2>
         <p className="mt-1 text-sm text-muted">
-          {author ? `${author.name}${author.credentials ? `, ${author.credentials}` : ""}` : "Unassigned"}
+          {author ? byline(author) : "Unassigned"}
         </p>
         <p className="mt-1 text-xs text-muted">Set by an editor via the byline dialog, not here.</p>
       </section>

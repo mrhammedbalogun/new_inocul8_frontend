@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { resolveMediaUrl, StudioError, studioFetch } from "@/lib/studio/client";
 import type { StudioMe, StudioPostDetail } from "@/lib/studio/types";
+import { byline } from "@/lib/author-byline";
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -239,15 +240,14 @@ export function PublishDialog({ post, me, html, open, onClose, onPublished }: Pr
             clinician's existing badge when a non-clinician republishes. */}
         {me.can_medically_review ? (
           <p className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm text-ink-900">
-            Publishing will mark this post as <strong>medically reviewed by you</strong> ({me.name}
-            {me.credentials ? `, ${me.credentials}` : ""}). Your name will appear on the article
+            Publishing will mark this post as <strong>medically reviewed by you</strong> (
+            {byline(me)}). Your name will appear on the article
             and in search results as the reviewer of this exact version.
           </p>
         ) : reviewer ? (
           <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-ink-900">
             <strong>This will remove the current medical-review badge.</strong> The live post is
-            marked “Medically reviewed by {reviewer.name}
-            {reviewer.credentials ? `, ${reviewer.credentials}` : ""}”, but that badge is
+            marked “Medically reviewed by {byline(reviewer)}”, but that badge is
             re-checked on every publish — and because you are not a credentialed clinician
             reviewer, publishing now puts this version live <strong>without</strong> it. If the
             badge should stay, ask a clinician editor

@@ -6,6 +6,7 @@ import { Clock, Calendar, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Breadcrumbs } from "@/components/service/breadcrumbs";
 import { ServiceProse } from "@/components/service/service-prose";
+import { byline } from "@/lib/author-byline";
 import { PostCard } from "@/components/blog/post-card";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { CtaBanner } from "@/components/sections/cta-banner";
@@ -102,7 +103,7 @@ export default async function PostPage({ params }: Props) {
               <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
                 <ShieldCheck className="size-4" />
                 {post.reviewedBy
-                  ? `Medically reviewed by ${post.reviewedBy.name}${post.reviewedBy.credentials ? `, ${post.reviewedBy.credentials}` : ""}`
+                  ? `Medically reviewed by ${byline(post.reviewedBy)}`
                   : "Medically reviewed"}
               </span>
             )}
@@ -165,17 +166,13 @@ export default async function PostPage({ params }: Props) {
                 </span>
               )}
               <div>
-                <p className="font-semibold text-ink-900">
-                  {post.author.name}
-                  {post.author.credentials ? `, ${post.author.credentials}` : ""}
-                </p>
+                <p className="font-semibold text-ink-900">{byline(post.author)}</p>
                 <p className="mt-0.5 text-sm text-muted">
                   {post.author.title}
                   {post.reviewedBy && (
                     <>
                       {post.author.title ? " · " : ""}
-                      Medically reviewed by {post.reviewedBy.name}
-                      {post.reviewedBy.credentials ? `, ${post.reviewedBy.credentials}` : ""}.
+                      Medically reviewed by {byline(post.reviewedBy)}.
                     </>
                   )}
                 </p>
