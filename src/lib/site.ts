@@ -27,7 +27,10 @@ export const site = {
   },
   // External booking is handled by Cowva. Every "Book" CTA resolves here; the
   // Button component opens absolute http(s) URLs in a new tab with rel=noopener.
-  bookingUrl: "https://booking.cowva.com/inocul8",
+  // Keep the trailing slash: Cowva 301s /inocul8 -> /inocul8/, so dropping it
+  // makes every CTA pay an extra round trip. Mirrored by BOOKING_URL in
+  // next.config.ts (which cannot import from src/) - change both together.
+  bookingUrl: "https://booking.cowva.com/inocul8/",
 } as const;
 
 export const phoneHref = `tel:+234${site.phones[0].replace(/^0/, "")}`;
