@@ -96,11 +96,12 @@ const nextConfig: NextConfig = {
       // The booking.inocul8.com.ng subdomain was reserved for an in-house
       // booking app that was never built (see the toolkit repo's CLAUDE.md).
       // It is a Cloudflare-proxied CNAME onto this Vercel project, so park it
-      // here: every path on that host lands on the external Cowva page.
+      // here rather than leave it dangling: every path on that host lands on
+      // the main site, which carries the Book CTAs through to Cowva.
       {
         source: "/:path*",
         has: [{ type: "host", value: "booking.inocul8.com.ng" }],
-        destination: BOOKING_URL,
+        destination: "https://inocul8.com.ng/",
         permanent: true,
       },
     ];
