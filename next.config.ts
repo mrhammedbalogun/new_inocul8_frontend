@@ -47,6 +47,12 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
 ];
 
+// Single destination for every booking entry point that Next.js resolves at
+// the edge. Mirrors `site.bookingUrl` in src/lib/site.ts (the source of truth
+// for in-page CTAs); next.config.ts cannot import from src/, so it is repeated
+// here — change both together.
+const BOOKING_URL = "https://booking.cowva.com/inocul8/";
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -82,9 +88,21 @@ const nextConfig: NextConfig = {
       { source: "/shop", destination: "/what-we-do", permanent: true },
       { source: "/shop/:path*", destination: "/what-we-do", permanent: true },
       // Booking is handled externally by Cowva. Preserve the legacy /book-now
-      // SEO URL with a permanent 301 to the external booking page.
-      { source: "/book-now", destination: "https://booking.cowva.com/inocul8", permanent: true },
-      { source: "/book", destination: "https://booking.cowva.com/inocul8", permanent: true },
+      // SEO URL with a permanent 301 to the external booking page. The
+      // trailing slash is the canonical form — booking.cowva.com/inocul8
+      // itself 301s to /inocul8/, so omitting it costs an extra hop.
+      { source: "/book-now", destination: BOOKING_URL, permanent: true },
+      { source: "/book", destination: BOOKING_URL, permanent: true },
+      // The booking.inocul8.com.ng subdomain was reserved for an in-house
+      // booking app that was never built (see the toolkit repo's CLAUDE.md).
+      // It is a Cloudflare-proxied CNAME onto this Vercel project, so park it
+      // here: every path on that host lands on the external Cowva page.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "booking.inocul8.com.ng" }],
+        destination: BOOKING_URL,
+        permanent: true,
+      },
     ];
   },
 };
